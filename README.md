@@ -1,67 +1,139 @@
-# StickyTags 论文复现项目
+# StickyTags 核心机制初步复现
 
-本仓库用于整理 StickyTags 论文的课程级复现材料，目标是让组员能够共同维护实验报告、运行流程、测试代码、测试数据说明和实验结果。
+本项目对论文提出的 StickyTags 标签保护策略进行课程级、机制层面的初步复现。项目在 QEMU AArch64 MTE 环境中构建并运行论文作者提供的修改版 LLVM/SafeStack 与 TCMalloc，通过堆、栈越界程序验证确定性标签轮转、标签持久性以及空间越界检测能力。
 
-当前复现状态：已完成核心机制层面的初步复现，包括 AArch64 MTE 环境检查、修改版 LLVM/SafeStack 与 TCMalloc 构建、堆/栈越界功能测试、16 标签轮转、边界距离测试、标签持久性测试、MTE 16 字节粒度测试，以及 protected/baseline 对照实验。
+当前结果表明，StickyTags 的核心设计思路已经能够在本地实验环境中运行和验证。本项目不是论文全部实验的完整复现，不包含真实 Arm MTE 硬件性能、SPEC 基准测试、手机实机评测和侧信道实验。
 
-这不是完整论文复现。当前结果主要证明 StickyTags 的空间漏洞防护思路能够在本地 QEMU AArch64 MTE 环境中跑通；尚未复现论文中的 SPEC 性能表、真实 Arm MTE 硬件开销、Pixel/Samsung 实机数据、真实应用大规模评测和侧信道实验。
+## 复现目标
 
-## 目录说明
+1. 理解 StickyTags 与传统随机内存标签方法的区别。
+2. 验证对象标签按照固定周期轮转，而不是随机分配。
+3. 验证对象释放并重新分配后，其标签仍与对应地址关联。
+4. 验证堆和栈对象附近的越界访问能够被 MTE 检测。
+5. 将保护版本与未保护版本放在相同测试条件下进行对照。
+
+## 核心设计思路
+
+传统随机标签方法在对象分配时随机选择标签。同一个内存位置被重新使用后，可能获得与旧指针相同的标签，因此检测结果带有概率性。
+
+StickyTags 将标签和内存位置稳定关联，并让连续对象使用确定性的 16 标签轮转。这样，越界指针进入附近对象时会遇到不同标签；同一地址被重新使用时仍保持相应标签，从而把论文关注的局部空间错误检测从随机概率行为转化为可重复验证的行为。
+
+本复现分别验证以下机制：
+
+- **标签轮转**：连续对象的前 16 个标签互不相同，第 17 个对象重新使用第 1 个标签。
+- **边界检测**：访问后续第 1 至第 15 个对象槽位时产生标签不匹配，第 16 个槽位因标签周期回绕而不产生标签不匹配。
+- **标签持久性**：同一地址多次释放和复用后，标签保持一致。
+- **堆栈覆盖**：TCMalloc 负责堆对象标签，修改版 SafeStack 负责栈对象标签。
+
+更完整的机制说明见 [设计思路](docs/design.md)。
+
+## 代表性结果
+
+### 堆、栈越界对照
+
+| 版本 | 堆越界 | 栈越界 |
+|---|---:|---:|
+| 未保护版本 | 0/20 检测 | 0/20 检测 |
+| StickyTags 保护版本 | 20/20 MTE 故障 | 20/20 MTE 故障 |
+
+### 核心机制验证
+
+| 验证内容 | 结果 |
+|---|---|
+| 标签轮转 | 连续 16 个标签互不相同，第 17 个与第 1 个相同 |
+| 边界距离 | 第 1 至第 15 个槽位产生 MTE 故障，第 16 个槽位不产生故障 |
+| 标签持久性 | 10,000 次分配中发生 9,990 次地址复用，标签不一致次数为 0 |
+| 故障分类 | 680/680 个预期故障均确认为 `SEGV_MTEAERR`，普通 `SIGSEGV` 为 0 |
+
+完整对照实验中，未保护版本有 400 个依赖标签布局的用例无法形成有效前提，因此记为 `SKIP`，不计作通过或失败。该结果反映的是未保护版本没有 StickyTags 标签布局，而不是保护机制成功。
+
+整理后的结果见 [结果摘要](results/summary/)，原始日志见 [实验日志](Experiment/logs/)。
+
+## 测试数据说明
+
+本项目使用的是根据论文机制自行设计的合成 C 测试程序，不是论文作者发布的数据集，也不是 860 个真实漏洞样本。
+
+完整机制测试的 860 条记录由参数组合产生：
+
+| 测试 | 记录数 | 计算方式 |
+|---|---:|---|
+| 边界距离 | 640 | 堆/栈 × 4 种对象大小 × 16 个槽位 × 5 轮 |
+| MTE 粒度 | 200 | 堆/栈 × 5 种偏移 × 20 轮 |
+| 标签轮转 | 10 | 堆/栈各 5 轮 |
+| 标签持久性 | 10 | 堆/栈各 5 轮 |
+| 合计 | 860 | 上述记录之和 |
+
+保护版本和未保护版本各执行一次完整矩阵，因此对照日志共有 1,720 条记录。680 个预期 MTE 故障来自边界距离测试中的 600 次故障和 MTE 粒度测试中的 80 次故障，它们表示重复实验次数，不表示发现了 680 个不同漏洞。
+
+其中，堆栈越界对照、标签轮转、边界距离和标签持久性构成 StickyTags 核心验证；MTE 粒度测试与大规模重复矩阵用于补充检查和保留实验依据。
+
+## 实验环境
+
+- 宿主系统：Windows + WSL2
+- 客体系统：QEMU AArch64 Linux
+- 硬件机制：Arm Memory Tagging Extension（MTE）
+- 编译器：StickyTags 修改版 LLVM/Clang
+- 堆分配器：StickyTags 修改版 TCMalloc/gperftools
+- 栈保护：修改版 SafeStack
+
+上游源码版本记录在 [源码清单](manifests/source-versions.txt)。大型第三方源码不直接提交到本仓库，需要按照清单固定的提交版本获取。
+
+## 运行流程
+
+现有实验环境中，主要执行顺序如下：
+
+```bash
+# 1. 启动并等待 MTE 虚拟机
+./Experiment/start-mte-vm.sh
+./Experiment/wait-for-mte-vm.sh
+
+# 2. 构建并部署测试程序
+./Experiment/build-mechanism-tests-aarch64.sh
+./Experiment/deploy-functional-tests.sh
+
+# 3. 运行核心机制测试
+./Experiment/run-mechanism-tests-in-vm.sh 5 20 1000
+
+# 4. 运行保护版本与未保护版本完整对照
+./Experiment/run-protected-baseline-in-vm.sh 5 20 1000
+```
+
+脚本默认使用当前复现环境中的 WSL 工作目录和虚拟机 SSH 配置。其他协作者首次运行前，需要先根据自己的路径、用户名和密钥调整环境配置。完整的源码获取、工具链构建、虚拟机启动和测试步骤见 [构建与运行流程](docs/build-and-run.md)。
+
+## 项目结构
 
 ```text
 .
-├── Experiment/        # 构建脚本、运行脚本、测试源码、原始日志和阶段记录
-├── Report/            # 已有实验报告和通俗总结
-├── docs/              # 设计思路、环境、运行流程、实验设计、协作说明
-├── results/summary/   # 从日志中提取出的关键结果摘要
-├── manifests/         # 上游源码版本和复现实验清单
-├── patches/           # 后续若修改上游源码，在这里保存补丁
-└── third_party/        # 第三方源码引用说明，不直接提交大型上游仓库
+├── Experiment/        # 构建脚本、测试源码、运行脚本和原始日志
+├── Report/            # 实验报告与复现工作总结
+├── docs/              # 设计、环境、流程、实验和协作说明
+├── manifests/         # 上游源码版本与复现实验清单
+├── patches/           # 上游源码修改补丁的预留目录
+├── results/summary/   # 从原始日志提取的结果摘要
+└── third_party/       # 第三方源码获取说明
 ```
 
-## 快速入口
+## 文档入口
 
-- 完整设计思路：`docs/design.md`
-- 实验环境：`docs/environment.md`
-- 构建和运行流程：`docs/build-and-run.md`
-- 测试数据集与结果：`docs/experiment-design.md`
-- 当前复现边界：`docs/limitations.md`
-- 分工建议：`docs/collaboration.md`
+- [完整设计思路](docs/design.md)
+- [实验环境](docs/environment.md)
+- [构建和运行流程](docs/build-and-run.md)
+- [测试设计与结果](docs/experiment-design.md)
+- [当前复现范围与限制](docs/limitations.md)
+- [协作与分工建议](docs/collaboration.md)
+- [初步复现报告](Report/StickyTags-%E5%88%9D%E6%AD%A5%E5%A4%8D%E7%8E%B0%E6%8A%A5%E5%91%8A.md)
+- [复现工作总结（通俗版）](Report/StickyTags-%E5%A4%8D%E7%8E%B0%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93-%E9%80%9A%E4%BF%97%E7%89%88.md)
 
-## 关键结果
+## 当前复现边界
 
-功能测试：
+目前可以支持的结论是：StickyTags 的关键标签分配和局部空间越界检测机制，已经在 QEMU AArch64 MTE 环境中完成初步复现。
 
-| variant | heap-oob | stack-oob |
-|---|---:|---:|
-| baseline | 0/20 faults | 0/20 faults |
-| protected | 20/20 faults | 20/20 faults |
+以下内容尚未复现：
 
-核心机制验证实验：
+- SPEC CPU 性能开销与论文完整性能表
+- 真实 Arm MTE 硬件上的性能和兼容性
+- Pixel、Samsung 等实机测试
+- Juliet、CVE 或真实应用的大规模漏洞评测
+- 论文中的侧信道、安全分析和其他扩展实验
 
-| suite | kind | cases | passed |
-|---|---|---:|---:|
-| boundary | heap | 320 | 320 |
-| boundary | stack | 320 | 320 |
-| cycle | heap | 5 | 5 |
-| cycle | stack | 5 | 5 |
-| granularity | heap | 100 | 100 |
-| granularity | stack | 100 | 100 |
-| persistence | heap | 5 | 5 |
-| persistence | stack | 5 | 5 |
-
-保护版本与未保护版本对照：
-
-| metric | baseline | protected |
-|---|---:|---:|
-| expected_faults | 0 | 680 |
-| observed_faults | 0 | 680 |
-| layout_unavailable | 400 | 0 |
-| skipped_layout_cases | 400 | 0 |
-| unexpected_sigsegv | 0 | 0 |
-| cycle_mechanism_passes | 0 | 10 |
-| persistence_tag_mismatches | 0 | 0 |
-
-`layout_unavailable` 用例现在记为 `SKIP`，不计作通过或失败。680 个受保护版本故障均通过 `si_code` 确认为 `SEGV_MTEAERR`，没有普通 `SIGSEGV` 被计为 MTE fault。
-
-原始记录见 `Experiment/logs/`，整理摘要见 `results/summary/`。
+因此，本仓库适合作为课程实验的核心方法初步复现与后续协作基础，不应表述为对论文全部结果的完整复现。
