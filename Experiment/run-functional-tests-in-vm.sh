@@ -2,8 +2,9 @@
 set -euo pipefail
 
 lab_root=/home/brave/stickytags-lab
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 ssh_key=/home/brave/.ssh/stickytags_vm_ed25519
-guest_script=/mnt/f/Paper/StickyTags/Experiment/run-functional-tests-guest.sh
+guest_script="$script_dir/run-functional-tests-guest.sh"
 log_file="$lab_root/logs/stage6-functional-test-results.txt"
 
 ssh \

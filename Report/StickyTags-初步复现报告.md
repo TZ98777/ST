@@ -23,7 +23,7 @@
 - `/home/brave/stickytags-lab/src/stickytags/gperftools/bak.git`
 - `/home/brave/stickytags-lab/src/stickytags/gperftools/install`
 
-保留了 `Experiment/logs`、`Experiment/tests`、`LEVEL2-REPRODUCTION.md` 和 `LEVEL3A-REPRODUCTION.md`，因为它们是当前复现实验证据。
+保留了 `Experiment/logs`、`Experiment/tests`、`MECHANISM-VALIDATION.md` 和 `PROTECTED-BASELINE-COMPARISON.md`，因为它们是当前复现实验证据。
 
 ## 3. 环境与产物
 
@@ -48,8 +48,8 @@ Guest 中的关键二进制：
 /opt/stickytags/bin/repository-test
 /opt/stickytags/bin/stickytags-functional
 /opt/stickytags/bin/unprotected-functional
-/opt/stickytags/bin/stickytags-level2
-/opt/stickytags/bin/unprotected-level2
+/opt/stickytags/bin/stickytags-mechanism
+/opt/stickytags/bin/unprotected-mechanism
 /opt/stickytags/lib/libtcmalloc.so.4.5.10
 ```
 
@@ -77,19 +77,19 @@ buf16 0xf00af65867fffc0 buf15 0xe00af65867fff80 buf14 0xf00af6586ffff80
 
 该输出说明原仓库测试程序中的 heap 和 stack 指针都带有 top-byte tag。
 
-## 5. Level 2 机制复现
+## 5. 核心机制验证实验
 
 运行命令：
 
 ```bash
-/mnt/f/Paper/StickyTags/Experiment/run-level2-in-vm.sh 5 20 1000
+./Experiment/run-mechanism-tests-in-vm.sh 5 20 1000
 ```
 
 结果文件：
 
 ```text
-F:\Paper\StickyTags\Experiment\logs\stage8-level2-results.txt
-F:\Paper\StickyTags\Experiment\logs\stage8-level2-summary.txt
+Experiment/logs/mechanism-test-results.txt
+Experiment/logs/mechanism-test-summary.txt
 ```
 
 复跑结果：
@@ -123,19 +123,19 @@ observed_faults=680
 - 680 个预期 MTE fault 全部观察到。
 - 10000 次 persistence 迭代中 tag mismatch 为 0。
 
-## 6. Level 3A 对照复现
+## 6. 保护版本与未保护版本对照复现
 
 运行命令：
 
 ```bash
-/mnt/f/Paper/StickyTags/Experiment/run-level3a-in-vm.sh 5 20 1000
+./Experiment/run-protected-baseline-in-vm.sh 5 20 1000
 ```
 
 结果文件：
 
 ```text
-F:\Paper\StickyTags\Experiment\logs\stage9-level3a-results.txt
-F:\Paper\StickyTags\Experiment\logs\stage9-level3a-summary.txt
+Experiment/logs/protected-baseline-results.txt
+Experiment/logs/protected-baseline-summary.txt
 ```
 
 关键结果：
@@ -167,7 +167,7 @@ protected persistence_tag_mismatches=0
 | Bounded spatial guard | slot 1-15 fault，slot 16 不 fault | 已初步复现 |
 | Persistent memory tags | `persistence_tag_mismatches=0` | 已初步复现 |
 | Heap + stack support | heap/stack 所有 suite 均通过 | 已初步复现 |
-| Protected vs baseline difference | Level 3A protected 680 faults，baseline 0 faults | 已初步复现 |
+| Protected vs baseline difference | protected 版本 680 个 fault，baseline 版本 0 个 fault | 已初步复现 |
 | SPEC performance overhead | 需要真实硬件和 SPEC 数据集 | 未复现 |
 | Juliet/CVE 安全评估 | 需要真实样本、PoC 和 ground truth | 未复现 |
 | Speculative probing | 需要真实 MTE 硬件侧信道环境 | 未复现 |

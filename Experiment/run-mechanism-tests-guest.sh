@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-binary=/opt/stickytags/bin/stickytags-level2
+binary=/opt/stickytags/bin/stickytags-mechanism
 boundary_trials=${1:-5}
 granularity_trials=${2:-20}
 persistence_iterations=${3:-1000}

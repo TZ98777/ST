@@ -5,7 +5,7 @@
 本项目当前没有使用 SPEC、Juliet、CVE PoC 或真实应用数据集。测试数据集是自定义合成测试程序，位于：
 
 - `Experiment/tests/stickytags-functional.c`
-- `Experiment/tests/stickytags-level2.c`
+- `Experiment/tests/stickytags-mechanism.c`
 
 这些测试用例专门覆盖 StickyTags 的核心机制：堆对象、栈对象、相邻对象越界、16 标签周期、地址复用标签持久性和 MTE 16 字节粒度。
 
@@ -15,8 +15,8 @@
 2. 构建 protected 测试程序，启用 StickyTags LLVM/SafeStack 与修改版 TCMalloc。
 3. 构建 baseline 测试程序，不启用 StickyTags 保护。
 4. 在 QEMU AArch64 MTE guest 中运行功能测试。
-5. 运行 Level 2 机制测试，覆盖标签轮转、边界距离、持久性和 MTE 粒度。
-6. 运行 Level 3A protected/baseline 对照测试。
+5. 运行 核心机制验证实验，覆盖标签轮转、边界距离、持久性和 MTE 粒度。
+6. 运行 保护版本与未保护版本对照测试。
 7. 保存原始日志，并提取结果摘要。
 
 ## 功能测试结果
@@ -28,7 +28,7 @@
 
 解释：未保护程序不会因为测试中的越界访问触发 MTE fault；protected 程序在堆和栈越界测试中均稳定触发 fault。
 
-## Level 2 机制测试结果
+## 核心机制验证实验结果
 
 | suite | kind | cases | passed | pass rate |
 |---|---|---:|---:|---:|
@@ -51,7 +51,7 @@
 - `persistence_reuses=9990`
 - `persistence_tag_mismatches=0`
 
-## Level 3A 对照结果
+## 保护版本与未保护版本对照结果
 
 | metric | baseline | protected |
 |---|---:|---:|

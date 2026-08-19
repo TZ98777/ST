@@ -1,14 +1,14 @@
-# StickyTags Level 3A Reproduction
+# StickyTags Protected/Baseline Comparison Validation
 
 Date: 2026-08-19
 
-Level 3A extends the level 2 mechanism tests with a protected-vs-baseline
+The protected/baseline comparison extends the core mechanism tests with a protected-vs-baseline
 comparison. This follows the paper's evaluation style: StickyTags is evaluated
 against unprotected or alternative baseline configurations, and its claims are
 about deterministic bounded spatial protection, persistent tags, size-class
 regions, and practical overhead.
 
-This level still avoids performance claims because the local setup uses QEMU
+This validation step still avoids performance claims because the local setup uses QEMU
 TCG rather than real Arm MTE hardware.
 
 ## Paper Alignment
@@ -30,7 +30,7 @@ reproduction:
 - Recording `layout_available` for the unprotected baseline.
 - Treating QEMU results as functional evidence only.
 
-The following paper content is not reproduced in level 3A:
+The following paper content is not reproduced in the protected/baseline comparison:
 
 - SPEC CPU2006 or SPEC CPU2017 performance tables.
 - Real Arm MTE hardware timing.
@@ -40,15 +40,15 @@ The following paper content is not reproduced in level 3A:
 
 ## Added Files
 
-- `run-level3a-guest.sh`: guest-side protected/baseline runner.
-- `run-level3a-in-vm.sh`: host-side SSH runner and summarizer.
-- `logs/stage9-level3a-results.txt`: raw Level 3A result records.
-- `logs/stage9-level3a-summary.txt`: summarized Level 3A result table.
+- `run-protected-baseline-guest.sh`: guest-side protected/baseline runner.
+- `run-protected-baseline-in-vm.sh`: host-side SSH runner and summarizer.
+- `logs/protected-baseline-results.txt`: raw protected/baseline comparison result records.
+- `logs/protected-baseline-summary.txt`: summarized protected/baseline comparison result table.
 
-Level 3A reuses the binaries built for level 2:
+The protected/baseline comparison reuses the binaries built for core mechanism validation:
 
-- `/opt/stickytags/bin/stickytags-level2`
-- `/opt/stickytags/bin/unprotected-level2`
+- `/opt/stickytags/bin/stickytags-mechanism`
+- `/opt/stickytags/bin/unprotected-mechanism`
 
 ## Test Matrix
 
@@ -64,11 +64,11 @@ Protected and baseline variants both run:
 
 ## Results
 
-Raw result records: `logs/stage9-level3a-results.txt`
+Raw result records: `logs/protected-baseline-results.txt`
 
-Summary: `logs/stage9-level3a-summary.txt`
+Summary: `logs/protected-baseline-summary.txt`
 
-Top-level checks:
+Overall checks:
 
 - Total `RESULT` records: 1720
 - Comparison failures: 0
@@ -110,7 +110,7 @@ Important baseline interpretation:
 
 ## Conclusion
 
-Level 3A strengthens the reproduction beyond level 2 by adding a full baseline
+The protected/baseline comparison strengthens the reproduction beyond core mechanism validation by adding a full baseline
 comparison over the same local mechanism tests. The result supports this
 limited claim:
 
@@ -119,7 +119,7 @@ MTE fault detection for the tested bounded spatial accesses, while the
 unprotected baseline does not produce MTE faults or StickyTags tag-cycle
 behavior.
 
-It does not support paper-level performance claims, because those require real
+It does not support full-paper performance claims, because those require real
 hardware or the paper's benchmark setup.
 
 ## Re-run Commands
@@ -127,9 +127,9 @@ hardware or the paper's benchmark setup.
 Run these inside the `StickyTagsLab` WSL distribution:
 
 ```bash
-/mnt/f/Paper/StickyTags/Experiment/build-level2-aarch64.sh
-/mnt/f/Paper/StickyTags/Experiment/start-mte-vm.sh
-/mnt/f/Paper/StickyTags/Experiment/wait-for-mte-vm.sh
-/mnt/f/Paper/StickyTags/Experiment/deploy-functional-tests.sh
-/mnt/f/Paper/StickyTags/Experiment/run-level3a-in-vm.sh 5 20 1000
+./Experiment/build-mechanism-tests-aarch64.sh
+./Experiment/start-mte-vm.sh
+./Experiment/wait-for-mte-vm.sh
+./Experiment/deploy-functional-tests.sh
+./Experiment/run-protected-baseline-in-vm.sh 5 20 1000
 ```

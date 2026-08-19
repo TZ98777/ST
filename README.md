@@ -37,7 +37,7 @@
 | baseline | 0/20 faults | 0/20 faults |
 | protected | 20/20 faults | 20/20 faults |
 
-Level 2 机制测试：
+核心机制验证实验：
 
 | suite | kind | cases | passed |
 |---|---|---:|---:|
@@ -50,7 +50,7 @@ Level 2 机制测试：
 | persistence | heap | 5 | 5 |
 | persistence | stack | 5 | 5 |
 
-Level 3A protected/baseline 对照：
+保护版本与未保护版本对照：
 
 | metric | baseline | protected |
 |---|---:|---:|

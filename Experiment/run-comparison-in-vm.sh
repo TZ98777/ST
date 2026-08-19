@@ -2,8 +2,9 @@
 set -euo pipefail
 
 lab_root=/home/brave/stickytags-lab
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 ssh_key=/home/brave/.ssh/stickytags_vm_ed25519
-guest_script=/mnt/f/Paper/StickyTags/Experiment/run-comparison-guest.sh
+guest_script="$script_dir/run-comparison-guest.sh"
 artifact="$lab_root/artifacts/aarch64/bin/unprotected-functional"
 raw_log="$lab_root/logs/stage7-comparison-results.csv"
 summary_log="$lab_root/logs/stage7-comparison-summary.txt"

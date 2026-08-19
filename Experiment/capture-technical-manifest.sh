@@ -2,9 +2,10 @@
 set -euo pipefail
 
 lab_root=/home/brave/stickytags-lab
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 repo="$lab_root/src/stickytags"
 artifact_dir="$lab_root/artifacts/aarch64"
-output_dir=/mnt/f/Paper/StickyTags/Experiment
+output_dir="$script_dir"
 manifest="$output_dir/manifests/technical-reproduction-manifest.txt"
 archive_dir="$output_dir/artifacts"
 

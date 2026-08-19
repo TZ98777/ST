@@ -1,27 +1,27 @@
-# StickyTags Level 2 Reproduction
+# StickyTags Core Mechanism Validation
 
 Date: 2026-08-19
 
-This document records the second reproduction level completed on the local
-Windows + WSL2 + QEMU AArch64 MTE environment. The level 2 work stays within
+This document records the core mechanism validation completed on the local
+Windows + WSL2 + QEMU AArch64 MTE environment. This validation work stays within
 local defensive testing and does not add exploit payloads.
 
 ## Added Files
 
-- `tests/stickytags-level2.c`: standalone AArch64 test program for level 2.
-- `build-level2-aarch64.sh`: builds both protected and unprotected level 2
+- `tests/stickytags-mechanism.c`: standalone AArch64 test program for core mechanism validation.
+- `build-mechanism-tests-aarch64.sh`: builds both protected and unprotected mechanism-validation
   binaries.
-- `run-level2-guest.sh`: runs level 2 cases inside the AArch64 guest.
-- `run-level2-in-vm.sh`: launches the guest-side runner over SSH and writes
+- `run-mechanism-tests-guest.sh`: runs core mechanism cases inside the AArch64 guest.
+- `run-mechanism-tests-in-vm.sh`: launches the guest-side runner over SSH and writes
   summary logs.
-- `logs/stage8-level2-build.log`: build log.
-- `logs/stage8-level2-results.txt`: raw level 2 result records.
-- `logs/stage8-level2-summary.txt`: summarized level 2 result table.
+- `logs/mechanism-test-build.log`: build log.
+- `logs/mechanism-test-results.txt`: raw core mechanism result records.
+- `logs/mechanism-test-summary.txt`: summarized core mechanism result table.
 
 ## Binaries Built
 
-- Protected binary: `/opt/stickytags/bin/stickytags-level2`
-- Baseline binary: `/opt/stickytags/bin/unprotected-level2`
+- Protected binary: `/opt/stickytags/bin/stickytags-mechanism`
+- Baseline binary: `/opt/stickytags/bin/unprotected-mechanism`
 
 The protected binary was built with:
 
@@ -32,13 +32,13 @@ The protected binary was built with:
 - modified StickyTags gperftools/TCMalloc
 - `libtcmalloc.so.4` deployed under `/opt/stickytags/lib`
 
-Build verification from `stage8-level2-build.log`:
+Build verification from `mechanism-test-build.log`:
 
-- `stickytags-level2` is an AArch64 PIE executable.
-- `stickytags-level2` has `RUNPATH=/opt/stickytags/lib`.
-- `stickytags-level2` depends on `libtcmalloc.so.4`.
+- `stickytags-mechanism` is an AArch64 PIE executable.
+- `stickytags-mechanism` has `RUNPATH=/opt/stickytags/lib`.
+- `stickytags-mechanism` depends on `libtcmalloc.so.4`.
 - SafeStack symbol count is `1`.
-- `unprotected-level2` TCMalloc dependency count is `0`.
+- `unprotected-mechanism` TCMalloc dependency count is `0`.
 
 ## Tests Implemented
 
@@ -69,11 +69,11 @@ Build verification from `stage8-level2-build.log`:
    expected to fault. This is tested for both heap and stack objects, 20 trials
    per index.
 
-## Level 2 Results
+## Core Mechanism Validation Results
 
-Raw result records: `logs/stage8-level2-results.txt`
+Raw result records: `logs/mechanism-test-results.txt`
 
-Summary: `logs/stage8-level2-summary.txt`
+Summary: `logs/mechanism-test-summary.txt`
 
 Summary numbers:
 
@@ -102,7 +102,7 @@ Additional metrics:
 
 ## Reproduction Boundary
 
-Level 2 is closer to the StickyTags paper than level 1 because it checks the
+The core mechanism validation is closer to the StickyTags paper than the initial functional smoke test because it checks the
 core mechanism beyond two representative overflows:
 
 - deterministic 16-tag reuse cycle
@@ -121,9 +121,9 @@ real Arm MTE hardware measurements.
 Run these inside the `StickyTagsLab` WSL distribution:
 
 ```bash
-/mnt/f/Paper/StickyTags/Experiment/build-level2-aarch64.sh
-/mnt/f/Paper/StickyTags/Experiment/start-mte-vm.sh
-/mnt/f/Paper/StickyTags/Experiment/wait-for-mte-vm.sh
-/mnt/f/Paper/StickyTags/Experiment/deploy-functional-tests.sh
-/mnt/f/Paper/StickyTags/Experiment/run-level2-in-vm.sh 5 20 1000
+./Experiment/build-mechanism-tests-aarch64.sh
+./Experiment/start-mte-vm.sh
+./Experiment/wait-for-mte-vm.sh
+./Experiment/deploy-functional-tests.sh
+./Experiment/run-mechanism-tests-in-vm.sh 5 20 1000
 ```

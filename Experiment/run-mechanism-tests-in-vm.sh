@@ -2,10 +2,11 @@
 set -euo pipefail
 
 lab_root=/home/brave/stickytags-lab
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 ssh_key=/home/brave/.ssh/stickytags_vm_ed25519
-guest_script=/mnt/f/Paper/StickyTags/Experiment/run-level2-guest.sh
-raw_log="$lab_root/logs/stage8-level2-results.txt"
-summary_log="$lab_root/logs/stage8-level2-summary.txt"
+guest_script="$script_dir/run-mechanism-tests-guest.sh"
+raw_log="$lab_root/logs/mechanism-test-results.txt"
+summary_log="$lab_root/logs/mechanism-test-summary.txt"
 boundary_trials=${1:-5}
 granularity_trials=${2:-20}
 persistence_iterations=${3:-1000}

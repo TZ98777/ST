@@ -2,10 +2,11 @@
 set -euo pipefail
 
 lab_root=/home/brave/stickytags-lab
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 llvm_build="$lab_root/build/llvm-rel-gcc13"
 tcmalloc_install="$lab_root/build/gperftools-aarch64-install"
 artifact_dir="$lab_root/artifacts/aarch64"
-source_dir=/mnt/f/Paper/StickyTags/Experiment/tests
+source_dir="$script_dir/tests"
 log_file="$lab_root/logs/stage6-functional-test-build.log"
 
 mkdir -p "$artifact_dir/bin" "$artifact_dir/lib"
