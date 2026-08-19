@@ -115,12 +115,13 @@ persistence_tag_mismatches=0
 fault_cases=840
 expected_faults=680
 observed_faults=680
+unexpected_sigsegv=0
 ```
 
 解释：
 
 - tag cycle、boundary、persistence、granularity 四类机制均通过。
-- 680 个预期 MTE fault 全部观察到。
+- 680 个预期 MTE fault 全部由 `SEGV_MTEAERR`（`si_code=8`）确认，没有普通段错误被计为 MTE fault。
 - 10000 次 persistence 迭代中 tag mismatch 为 0。
 
 ## 6. 保护版本与未保护版本对照复现
@@ -143,19 +144,23 @@ Experiment/logs/protected-baseline-summary.txt
 ```text
 baseline expected_faults=0
 baseline observed_faults=0
+baseline skipped_layout_cases=400
+baseline unexpected_sigsegv=0
 baseline cycle_mechanism_passes=0
 baseline persistence_tag_mismatches=0
 
 protected expected_faults=680
 protected observed_faults=680
+protected skipped_layout_cases=0
+protected unexpected_sigsegv=0
 protected cycle_mechanism_passes=10
 protected persistence_tag_mismatches=0
 ```
 
 解释：
 
-- baseline 没有观察到 MTE fault，也没有 StickyTags tag-cycle 机制通过记录。
-- protected 版本观察到 680/680 个预期 fault。
+- baseline 没有观察到 MTE fault，也没有 StickyTags tag-cycle 机制通过记录；其中 400 个依赖 StickyTags 连续布局但无法实施的用例被记为 `SKIP`，没有计作通过。
+- protected 版本观察到 680/680 个预期 fault，全部保存了 `fault_kind` 和 `fault_si_code`。
 - 同一测试矩阵下 protected 与 baseline 行为不同，说明 fault 行为来自 StickyTags 保护机制，而不是测试程序本身。
 
 ## 7. 与论文主张的对应关系

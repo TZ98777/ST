@@ -50,6 +50,9 @@ $1 == "RESULT" {
         persist_reuses += field("reuses")
         persist_mismatches += field("mismatches")
     }
+    if (field("unexpected_sigsegv") == "1") {
+        unexpected_sigsegv++
+    }
     if (suite == "boundary" || suite == "granularity") {
         fault_cases++
         if (field("expected_fault") == "1") {
@@ -73,6 +76,12 @@ END {
     printf "metric,fault_cases,%d\n", fault_cases
     printf "metric,expected_faults,%d\n", expected_faults
     printf "metric,observed_faults,%d\n", observed_faults
+    printf "metric,unexpected_sigsegv,%d\n", unexpected_sigsegv
 }' "$raw_log" > "$summary_log"
 
 cat "$summary_log"
+
+if grep -q 'pass=0' "$raw_log"; then
+    echo "Mechanism validation contains failed cases." >&2
+    exit 1
+fi

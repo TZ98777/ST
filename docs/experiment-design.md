@@ -46,6 +46,7 @@
 - `fault_cases=840`
 - `expected_faults=680`
 - `observed_faults=680`
+- `unexpected_sigsegv=0`
 - `cycle_objects=320`
 - `persistence_iterations=10000`
 - `persistence_reuses=9990`
@@ -58,10 +59,12 @@
 | expected_faults | 0 | 680 |
 | observed_faults | 0 | 680 |
 | layout_unavailable | 400 | 0 |
+| skipped_layout_cases | 400 | 0 |
+| unexpected_sigsegv | 0 | 0 |
 | cycle_mechanism_passes | 0 | 10 |
 | persistence_iterations | 10000 | 10000 |
 | persistence_tag_mismatches | 0 | 0 |
 
-解释：protected 版本表现出 StickyTags 的 16 标签轮转和越界 fault 行为；baseline 没有 StickyTags size-class 布局，因此记录了 `layout_unavailable=400`，也没有产生 MTE fault。
+解释：protected 版本表现出 StickyTags 的 16 标签轮转和越界 fault 行为；680 个故障均由 `SEGV_MTEAERR` 专用故障码确认，普通段错误数量为 0。baseline 没有 StickyTags size-class 布局的 400 个用例记录为 `SKIP`，不计作通过或失败；其余实际执行的 baseline 用例没有产生 MTE fault。
 
 原始数据见 `Experiment/logs/`，整理摘要见 `results/summary/`。

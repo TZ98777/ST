@@ -14,3 +14,4 @@ metric,persistence_tag_mismatches,0
 metric,fault_cases,840
 metric,expected_faults,680
 metric,observed_faults,680
+metric,unexpected_sigsegv,0

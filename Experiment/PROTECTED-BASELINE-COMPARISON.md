@@ -76,34 +76,39 @@ Overall checks:
 - Protected observed MTE faults: 680
 - Baseline expected MTE faults: 0
 - Baseline observed MTE faults: 0
+- Unexpected non-MTE `SIGSEGV` records: 0
+- Baseline layout-dependent cases skipped: 400
 
 Summary table:
 
-| variant | suite | kind | cases | passed | pass rate |
-|---|---|---|---:|---:|---:|
-| protected | boundary | heap | 320 | 320 | 100.0% |
-| protected | boundary | stack | 320 | 320 | 100.0% |
-| protected | cycle | heap | 5 | 5 | 100.0% |
-| protected | cycle | stack | 5 | 5 | 100.0% |
-| protected | granularity | heap | 100 | 100 | 100.0% |
-| protected | granularity | stack | 100 | 100 | 100.0% |
-| protected | persistence | heap | 5 | 5 | 100.0% |
-| protected | persistence | stack | 5 | 5 | 100.0% |
-| baseline | boundary | heap | 320 | 320 | 100.0% |
-| baseline | boundary | stack | 320 | 320 | 100.0% |
-| baseline | cycle | heap | 5 | 5 | 100.0% |
-| baseline | cycle | stack | 5 | 5 | 100.0% |
-| baseline | granularity | heap | 100 | 100 | 100.0% |
-| baseline | granularity | stack | 100 | 100 | 100.0% |
-| baseline | persistence | heap | 5 | 5 | 100.0% |
-| baseline | persistence | stack | 5 | 5 | 100.0% |
+| variant | suite | kind | cases | passed | skipped | failed | pass rate of executed cases |
+|---|---|---|---:|---:|---:|---:|---:|
+| protected | boundary | heap | 320 | 320 | 0 | 0 | 100.0% |
+| protected | boundary | stack | 320 | 320 | 0 | 0 | 100.0% |
+| protected | cycle | heap | 5 | 5 | 0 | 0 | 100.0% |
+| protected | cycle | stack | 5 | 5 | 0 | 0 | 100.0% |
+| protected | granularity | heap | 100 | 100 | 0 | 0 | 100.0% |
+| protected | granularity | stack | 100 | 100 | 0 | 0 | 100.0% |
+| protected | persistence | heap | 5 | 5 | 0 | 0 | 100.0% |
+| protected | persistence | stack | 5 | 5 | 0 | 0 | 100.0% |
+| baseline | boundary | heap | 320 | 0 | 320 | 0 | N/A |
+| baseline | boundary | stack | 320 | 320 | 0 | 0 | 100.0% |
+| baseline | cycle | heap | 5 | 5 | 0 | 0 | 100.0% |
+| baseline | cycle | stack | 5 | 5 | 0 | 0 | 100.0% |
+| baseline | granularity | heap | 100 | 60 | 40 | 0 | 100.0% |
+| baseline | granularity | stack | 100 | 60 | 40 | 0 | 100.0% |
+| baseline | persistence | heap | 5 | 5 | 0 | 0 | 100.0% |
+| baseline | persistence | stack | 5 | 5 | 0 | 0 | 100.0% |
 
 Important baseline interpretation:
 
 - The baseline produced `0` MTE faults, as expected.
 - The baseline had `400` `layout_available=0` records because it does not use
-  StickyTags size-class regions. These are recorded separately instead of being
-  treated as MTE failures.
+  StickyTags size-class regions. These are classified as `SKIP`, excluded from
+  the executed-case pass rate, and are not presented as successful tests.
+- Every observed fault retains its `si_code` and fault kind. Non-MTE
+  segmentation faults fail the comparison rather than being counted as MTE
+  faults.
 - The baseline had `0` cycle mechanism passes, while the protected variant had
   `10`. This shows the 16-tag deterministic cycle is coming from StickyTags,
   not from normal AArch64 code.

@@ -13,12 +13,23 @@ run_report_case() {
     local suite=$3
     local kind=$4
     shift 4
-    local output status result_line observed expected comparison
+    local output status result_line observed expected comparison comparison_status
+    local fault_line fault_kind fault_si_code unexpected_sigsegv
 
     output=$(timeout --foreground --signal=KILL 30 "$binary" "$suite" "$kind" "$@" 2>&1)
     status=$?
     result_line=$(grep '^RESULT,' <<<"$output" | head -n 1)
     observed=$(sed -n 's/.*pass=\([0-9]\).*/\1/p' <<<"$result_line")
+    fault_line=$(grep -E '^(MTE_FAULT|SIGSEGV_FAULT),' <<<"$output" | head -n 1)
+    fault_kind=$(sed -n 's/.*kind=\([^,]*\).*/\1/p' <<<"$fault_line")
+    fault_si_code=$(sed -n 's/.*si_code=\([^,]*\).*/\1/p' <<<"$fault_line")
+    fault_kind=${fault_kind:-none}
+    fault_si_code=${fault_si_code:-NA}
+    if grep -q '^SIGSEGV_FAULT,' <<<"$output"; then
+        unexpected_sigsegv=1
+    else
+        unexpected_sigsegv=0
+    fi
 
     if [[ $suite == cycle && $variant == baseline ]]; then
         expected=0
@@ -26,19 +37,24 @@ run_report_case() {
         expected=1
     fi
 
-    if [[ -n $observed && $observed -eq $expected ]]; then
+    if [[ -n $observed && $observed -eq $expected && $unexpected_sigsegv -eq 0 ]]; then
         comparison=1
+        comparison_status=pass
     else
         comparison=0
+        comparison_status=fail
     fi
 
     if [[ -n $result_line ]]; then
-        printf 'RESULT,variant=%s,expected_mechanism_pass=%s,observed_mechanism_pass=%s,comparison_pass=%s,exit_status=%s,%s\n' \
-            "$variant" "$expected" "${observed:-NA}" "$comparison" "$status" \
+        printf 'RESULT,variant=%s,expected_mechanism_pass=%s,observed_mechanism_pass=%s,comparison_status=%s,comparison_pass=%s,exit_status=%s,fault_kind=%s,fault_si_code=%s,unexpected_sigsegv=%s,%s\n' \
+            "$variant" "$expected" "${observed:-NA}" "$comparison_status" \
+            "$comparison" "$status" "$fault_kind" "$fault_si_code" \
+            "$unexpected_sigsegv" \
             "${result_line#RESULT,}"
     else
-        printf 'RESULT,variant=%s,suite=%s,kind=%s,args=%s,expected_mechanism_pass=%s,observed_mechanism_pass=NA,comparison_pass=0,exit_status=%s\n' \
-            "$variant" "$suite" "$kind" "$*" "$expected" "$status"
+        printf 'RESULT,variant=%s,suite=%s,kind=%s,args=%s,expected_mechanism_pass=%s,observed_mechanism_pass=NA,comparison_status=fail,comparison_pass=0,exit_status=%s,fault_kind=%s,fault_si_code=%s,unexpected_sigsegv=%s\n' \
+            "$variant" "$suite" "$kind" "$*" "$expected" "$status" \
+            "$fault_kind" "$fault_si_code" "$unexpected_sigsegv"
     fi
 }
 
@@ -52,6 +68,7 @@ run_fault_case() {
     local trial=$7
     local protected_expected_fault=$8
     local expected_fault output status mte_fault comparison layout_available
+    local comparison_status unexpected_sigsegv fault_line fault_kind fault_si_code
 
     if [[ $variant == protected ]]; then
         expected_fault=$protected_expected_fault
@@ -68,10 +85,20 @@ run_fault_case() {
     fi
     status=$?
 
-    if grep -q '^MTE_FAULT,' <<<"$output"; then
+    fault_line=$(grep -E '^(MTE_FAULT|SIGSEGV_FAULT),' <<<"$output" | head -n 1)
+    fault_kind=$(sed -n 's/.*kind=\([^,]*\).*/\1/p' <<<"$fault_line")
+    fault_si_code=$(sed -n 's/.*si_code=\([^,]*\).*/\1/p' <<<"$fault_line")
+    fault_kind=${fault_kind:-none}
+    fault_si_code=${fault_si_code:-NA}
+    if grep -Eq '^MTE_FAULT,.*kind=SEGV_MTE(AERR|SERR)(,|$)' <<<"$output"; then
         mte_fault=1
     else
         mte_fault=0
+    fi
+    if grep -q '^SIGSEGV_FAULT,' <<<"$output"; then
+        unexpected_sigsegv=1
+    else
+        unexpected_sigsegv=0
     fi
 
     if grep -q 'layout=not_contiguous' <<<"$output"; then
@@ -81,30 +108,41 @@ run_fault_case() {
     fi
 
     if [[ $variant == baseline ]]; then
-        if [[ $mte_fault -eq 0 && ( $status -eq 0 || $status -eq 3 ) ]]; then
+        if [[ $layout_available -eq 0 && $status -eq 3 && $mte_fault -eq 0 && $unexpected_sigsegv -eq 0 ]]; then
+            comparison=NA
+            comparison_status=skip
+        elif [[ $mte_fault -eq 0 && $unexpected_sigsegv -eq 0 && $status -eq 0 ]]; then
             comparison=1
+            comparison_status=pass
         else
             comparison=0
+            comparison_status=fail
         fi
     else
-        if [[ $expected_fault -eq 1 && $mte_fault -eq 1 ]]; then
+        if [[ $expected_fault -eq 1 && $mte_fault -eq 1 && $unexpected_sigsegv -eq 0 ]]; then
             comparison=1
-        elif [[ $expected_fault -eq 0 && $mte_fault -eq 0 && $status -eq 0 ]]; then
+            comparison_status=pass
+        elif [[ $expected_fault -eq 0 && $mte_fault -eq 0 && $unexpected_sigsegv -eq 0 && $status -eq 0 ]]; then
             comparison=1
+            comparison_status=pass
         else
             comparison=0
+            comparison_status=fail
         fi
     fi
 
     if [[ $suite == boundary ]]; then
-        printf 'RESULT,variant=%s,suite=boundary,kind=%s,size=%s,slot=%s,trial=%s,expected_fault=%s,exit_status=%s,mte_fault=%s,layout_available=%s,comparison_pass=%s\n' \
+        printf 'RESULT,variant=%s,suite=boundary,kind=%s,size=%s,slot=%s,trial=%s,expected_fault=%s,exit_status=%s,mte_fault=%s,fault_kind=%s,fault_si_code=%s,unexpected_sigsegv=%s,layout_available=%s,comparison_status=%s,comparison_pass=%s\n' \
             "$variant" "$kind" "$size_or_index" "$param" "$trial" \
-            "$expected_fault" "$status" "$mte_fault" "$layout_available" \
-            "$comparison"
+            "$expected_fault" "$status" "$mte_fault" "$fault_kind" \
+            "$fault_si_code" "$unexpected_sigsegv" "$layout_available" \
+            "$comparison_status" "$comparison"
     else
-        printf 'RESULT,variant=%s,suite=granularity,kind=%s,size=10,index=%s,trial=%s,expected_fault=%s,exit_status=%s,mte_fault=%s,layout_available=%s,comparison_pass=%s\n' \
+        printf 'RESULT,variant=%s,suite=granularity,kind=%s,size=10,index=%s,trial=%s,expected_fault=%s,exit_status=%s,mte_fault=%s,fault_kind=%s,fault_si_code=%s,unexpected_sigsegv=%s,layout_available=%s,comparison_status=%s,comparison_pass=%s\n' \
             "$variant" "$kind" "$param" "$trial" "$expected_fault" \
-            "$status" "$mte_fault" "$layout_available" "$comparison"
+            "$status" "$mte_fault" "$fault_kind" "$fault_si_code" \
+            "$unexpected_sigsegv" "$layout_available" \
+            "$comparison_status" "$comparison"
     fi
 }
 

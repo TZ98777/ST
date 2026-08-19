@@ -40,8 +40,15 @@ $1 == "RESULT" {
     kind = field("kind")
     key = variant "," suite "," kind
     total[key]++
-    if (field("comparison_pass") == "1") {
+    if (field("comparison_status") == "pass") {
         passed[key]++
+    } else if (field("comparison_status") == "skip") {
+        skipped[key]++
+    } else {
+        failed[key]++
+    }
+    if (field("unexpected_sigsegv") == "1") {
+        unexpected_sigsegv[variant]++
     }
     if (suite == "boundary" || suite == "granularity") {
         fault_cases[variant]++
@@ -64,16 +71,19 @@ $1 == "RESULT" {
     }
 }
 END {
-    print "variant,suite,kind,cases,passed,pass_rate_percent"
+    print "variant,suite,kind,cases,passed,skipped,failed,pass_rate_percent"
     for (key in total) {
-        printf "%s,%d,%d,%.1f\n", key, total[key], passed[key] + 0,
-               100.0 * (passed[key] + 0) / total[key]
+        executed = total[key] - (skipped[key] + 0)
+        rate = executed > 0 ? sprintf("%.1f", 100.0 * (passed[key] + 0) / executed) : "NA"
+        printf "%s,%d,%d,%d,%d,%s\n", key, total[key], passed[key] + 0,
+               skipped[key] + 0, failed[key] + 0, rate
     }
     for (variant in fault_cases) {
         printf "metric,%s,fault_cases,%d\n", variant, fault_cases[variant]
         printf "metric,%s,expected_faults,%d\n", variant, expected_faults[variant] + 0
         printf "metric,%s,observed_faults,%d\n", variant, observed_faults[variant] + 0
         printf "metric,%s,layout_unavailable,%d\n", variant, layout_unavailable[variant] + 0
+        printf "metric,%s,unexpected_sigsegv,%d\n", variant, unexpected_sigsegv[variant] + 0
         printf "metric,%s,cycle_mechanism_passes,%d\n", variant, cycle_mechanism_pass[variant] + 0
         printf "metric,%s,persistence_iterations,%d\n", variant, persistence_iterations[variant] + 0
         printf "metric,%s,persistence_tag_mismatches,%d\n", variant, persistence_mismatches[variant] + 0
@@ -81,3 +91,8 @@ END {
 }' "$raw_log" > "$summary_log"
 
 cat "$summary_log"
+
+if grep -q 'comparison_status=fail' "$raw_log"; then
+    echo "Protected/baseline comparison contains failed cases." >&2
+    exit 1
+fi

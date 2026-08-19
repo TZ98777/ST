@@ -56,3 +56,8 @@ ssh "${ssh_options[@]}" brave@127.0.0.1 \
 } > "$summary_log"
 
 cat "$summary_log"
+
+if awk -F, 'NR > 1 && $8 == 1 { found = 1 } END { exit(found ? 0 : 1) }' "$raw_log"; then
+    echo "Functional comparison contains a non-MTE segmentation fault." >&2
+    exit 1
+fi

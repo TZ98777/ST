@@ -59,19 +59,23 @@ static volatile unsigned char *retagged_pointer(const void *base,
 static void segv_handler(int signal_number, siginfo_t *info, void *context) {
     (void)context;
     const char *kind = "other";
+    int is_mte_fault = 0;
 #ifdef SEGV_MTEAERR
     if (info->si_code == SEGV_MTEAERR) {
         kind = "SEGV_MTEAERR";
+        is_mte_fault = 1;
     }
 #endif
 #ifdef SEGV_MTESERR
     if (info->si_code == SEGV_MTESERR) {
         kind = "SEGV_MTESERR";
+        is_mte_fault = 1;
     }
 #endif
     char message[256];
     int length = snprintf(message, sizeof(message),
-                          "MTE_FAULT,signal=%d,si_code=%d,kind=%s,si_addr=%p\n",
+                          "%s,signal=%d,si_code=%d,kind=%s,si_addr=%p\n",
+                          is_mte_fault ? "MTE_FAULT" : "SIGSEGV_FAULT",
                           signal_number, info->si_code, kind, info->si_addr);
     if (length > 0) {
         write(STDERR_FILENO, message, (size_t)length);

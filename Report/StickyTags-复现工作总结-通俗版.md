@@ -370,6 +370,7 @@ persistence_tag_mismatches=0
 fault_cases=840
 expected_faults=680
 observed_faults=680
+unexpected_sigsegv=0
 ```
 
 ### 6.3 protected 与 baseline 的完整对照
@@ -381,21 +382,24 @@ observed_faults=680
 ```text
 protected expected_faults=680
 protected observed_faults=680
+protected unexpected_sigsegv=0
 protected cycle_mechanism_passes=10
 protected persistence_tag_mismatches=0
 
 baseline expected_faults=0
 baseline observed_faults=0
+baseline unexpected_sigsegv=0
 baseline cycle_mechanism_passes=0
 baseline layout_unavailable=400
+baseline skipped_layout_cases=400
 ```
 
 解释：
 
-- protected 的 680 个预期 MTE fault 全部观察到；
+- protected 的 680 个预期 MTE fault 全部由 `SEGV_MTEAERR`（`si_code=8`）确认，普通段错误为 0；
 - baseline 没有 MTE fault，符合“普通程序没有 StickyTags 保护”的预期；
 - baseline 没有出现 StickyTags 的 16-tag 机制通过记录；
-- baseline 有 400 条 `layout_unavailable=0`，说明它没有 StickyTags 的 size-class/tag layout 信息；
+- baseline 有 400 条布局不可用记录，说明它没有 StickyTags 的 size-class/tag layout；这些用例现在记为 `SKIP`，不再算作“通过”；
 - 因此，故障差异来自 protected 程序中的 StickyTags 机制，而不是测试程序本身。
 
 ## 7. 当前结果能说明什么

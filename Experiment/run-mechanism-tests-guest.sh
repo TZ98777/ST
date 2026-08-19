@@ -10,14 +10,25 @@ run_report_case() {
     local suite=$1
     local kind=$2
     shift 2
-    local output status
+    local output status fault_line fault_kind fault_si_code unexpected_sigsegv
     output=$(timeout --foreground --signal=KILL 30 "$binary" "$suite" "$kind" "$@" 2>&1)
     status=$?
+    fault_line=$(grep -E '^(MTE_FAULT|SIGSEGV_FAULT),' <<<"$output" | head -n 1)
+    fault_kind=$(sed -n 's/.*kind=\([^,]*\).*/\1/p' <<<"$fault_line")
+    fault_si_code=$(sed -n 's/.*si_code=\([^,]*\).*/\1/p' <<<"$fault_line")
+    fault_kind=${fault_kind:-none}
+    fault_si_code=${fault_si_code:-NA}
+    if grep -q '^SIGSEGV_FAULT,' <<<"$output"; then
+        unexpected_sigsegv=1
+    else
+        unexpected_sigsegv=0
+    fi
     if grep -q '^RESULT,' <<<"$output"; then
         grep '^RESULT,' <<<"$output"
     else
-        printf 'RESULT,suite=%s,kind=%s,args=%s,exit_status=%d,pass=0\n' \
-            "$suite" "$kind" "$*" "$status"
+        printf 'RESULT,suite=%s,kind=%s,args=%s,exit_status=%d,fault_kind=%s,fault_si_code=%s,unexpected_sigsegv=%s,pass=0\n' \
+            "$suite" "$kind" "$*" "$status" "$fault_kind" \
+            "$fault_si_code" "$unexpected_sigsegv"
     fi
 }
 
@@ -28,7 +39,8 @@ run_fault_case() {
     local param=$4
     local trial=$5
     local expected_fault=$6
-    local output status mte_fault pass
+    local output status mte_fault unexpected_sigsegv pass
+    local fault_line fault_kind fault_si_code
 
     if [[ $suite == boundary ]]; then
         output=$(timeout --foreground --signal=KILL 30 "$binary" \
@@ -38,26 +50,38 @@ run_fault_case() {
             granularity "$kind" "$param" 2>&1)
     fi
     status=$?
-    if grep -q '^MTE_FAULT,' <<<"$output"; then
+    fault_line=$(grep -E '^(MTE_FAULT|SIGSEGV_FAULT),' <<<"$output" | head -n 1)
+    fault_kind=$(sed -n 's/.*kind=\([^,]*\).*/\1/p' <<<"$fault_line")
+    fault_si_code=$(sed -n 's/.*si_code=\([^,]*\).*/\1/p' <<<"$fault_line")
+    fault_kind=${fault_kind:-none}
+    fault_si_code=${fault_si_code:-NA}
+    if grep -Eq '^MTE_FAULT,.*kind=SEGV_MTE(AERR|SERR)(,|$)' <<<"$output"; then
         mte_fault=1
     else
         mte_fault=0
     fi
-    if [[ $expected_fault -eq 1 && $mte_fault -eq 1 ]]; then
+    if grep -q '^SIGSEGV_FAULT,' <<<"$output"; then
+        unexpected_sigsegv=1
+    else
+        unexpected_sigsegv=0
+    fi
+    if [[ $expected_fault -eq 1 && $mte_fault -eq 1 && $unexpected_sigsegv -eq 0 ]]; then
         pass=1
-    elif [[ $expected_fault -eq 0 && $mte_fault -eq 0 && $status -eq 0 ]]; then
+    elif [[ $expected_fault -eq 0 && $mte_fault -eq 0 && $unexpected_sigsegv -eq 0 && $status -eq 0 ]]; then
         pass=1
     else
         pass=0
     fi
     if [[ $suite == boundary ]]; then
-        printf 'RESULT,suite=boundary,kind=%s,size=%s,slot=%s,trial=%s,expected_fault=%s,exit_status=%s,mte_fault=%s,pass=%s\n' \
+        printf 'RESULT,suite=boundary,kind=%s,size=%s,slot=%s,trial=%s,expected_fault=%s,exit_status=%s,mte_fault=%s,fault_kind=%s,fault_si_code=%s,unexpected_sigsegv=%s,pass=%s\n' \
             "$kind" "$size_or_index" "$param" "$trial" "$expected_fault" \
-            "$status" "$mte_fault" "$pass"
+            "$status" "$mte_fault" "$fault_kind" "$fault_si_code" \
+            "$unexpected_sigsegv" "$pass"
     else
-        printf 'RESULT,suite=granularity,kind=%s,size=10,index=%s,trial=%s,expected_fault=%s,exit_status=%s,mte_fault=%s,pass=%s\n' \
+        printf 'RESULT,suite=granularity,kind=%s,size=10,index=%s,trial=%s,expected_fault=%s,exit_status=%s,mte_fault=%s,fault_kind=%s,fault_si_code=%s,unexpected_sigsegv=%s,pass=%s\n' \
             "$kind" "$param" "$trial" "$expected_fault" "$status" \
-            "$mte_fault" "$pass"
+            "$mte_fault" "$fault_kind" "$fault_si_code" \
+            "$unexpected_sigsegv" "$pass"
     fi
 }
 

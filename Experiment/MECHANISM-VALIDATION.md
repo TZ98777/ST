@@ -99,6 +99,12 @@ Additional metrics:
 - Fault-checking cases: 840
 - Expected MTE faults: 680
 - Observed MTE faults: 680
+- Unexpected non-MTE `SIGSEGV` records: 0
+
+Every fault-checking `RESULT` record preserves `fault_kind` and
+`fault_si_code`. All 680 observed faults were classified as
+`SEGV_MTEAERR` with `si_code=8`; a non-MTE segmentation fault is recorded as
+`SIGSEGV_FAULT` and fails the case instead of being counted as an MTE fault.
 
 ## Reproduction Boundary
 

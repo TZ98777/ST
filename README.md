@@ -57,7 +57,11 @@
 | expected_faults | 0 | 680 |
 | observed_faults | 0 | 680 |
 | layout_unavailable | 400 | 0 |
+| skipped_layout_cases | 400 | 0 |
+| unexpected_sigsegv | 0 | 0 |
 | cycle_mechanism_passes | 0 | 10 |
 | persistence_tag_mismatches | 0 | 0 |
+
+`layout_unavailable` 用例现在记为 `SKIP`，不计作通过或失败。680 个受保护版本故障均通过 `si_code` 确认为 `SEGV_MTEAERR`，没有普通 `SIGSEGV` 被计为 MTE fault。
 
 原始记录见 `Experiment/logs/`，整理摘要见 `results/summary/`。
