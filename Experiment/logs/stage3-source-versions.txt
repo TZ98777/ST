@@ -1,0 +1,16 @@
+Recorded at: 2026-08-17T16:49:51+08:00
+
+Main repository:
+db3ba2616ce0935fba6352192a43010ba9d3172a
+https://github.com/vusec/stickytags.git
+
+Submodules:
+ 9623aa8a6c5ca7cec937faefcea72981beee8c09 spectre-mte (heads/main)
+
+Missing objects:
+0
+
+Repository size:
+1.9G	.
+
+Worktree status:

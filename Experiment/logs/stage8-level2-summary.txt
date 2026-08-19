@@ -1,0 +1,16 @@
+suite,kind,cases,passed,pass_rate_percent
+cycle,heap,5,5,100.0
+granularity,stack,100,100,100.0
+boundary,stack,320,320,100.0
+granularity,heap,100,100,100.0
+cycle,stack,5,5,100.0
+persistence,stack,5,5,100.0
+boundary,heap,320,320,100.0
+persistence,heap,5,5,100.0
+metric,cycle_objects,320
+metric,persistence_iterations,10000
+metric,persistence_reuses,9990
+metric,persistence_tag_mismatches,0
+metric,fault_cases,840
+metric,expected_faults,680
+metric,observed_faults,680

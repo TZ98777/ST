@@ -1,0 +1,41 @@
+=== representative baseline/protected comparison ===
+2026-08-18T05:27:57+00:00
+Linux stickytags-arm64 6.8.0-137-generic #137-Ubuntu SMP PREEMPT_DYNAMIC Fri Jul 17 19:15:13 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+Features	: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm ssbs sb paca pacg dcpodp sve2 sveaes svepmull svebitperm svesha3 svesm4 flagm2 frint svei8mm svef32mm svef64mm svebf16 i8mm bf16 dgh rng bti mte ecv afp rpres mte3 wfxt ebf16 sveebf16 cssc sve2p1 mops hbc sveb16b16 lse128
+
+=== variant=baseline case=normal ===
+heap first=0xc61a4476b2a0 tag=0 second=0xc61a4476b2d0 tag=0
+stack first=0xffffedab5460 tag=0 second=0xffffedab5440 tag=0 index=31
+normal accesses completed
+EXIT_STATUS=0
+
+=== variant=baseline case=heap-oob ===
+heap first=0xc66ce057f2a0 tag=0 second=0xc66ce057f2d0 tag=0
+about to write first[32] (one byte beyond the 32-byte object)
+heap out-of-bounds write returned; waiting for async MTE fault
+EXIT_STATUS=0
+
+=== variant=baseline case=stack-oob ===
+stack first=0xfffffb770f10 tag=0 second=0xfffffb770ef0 tag=0 index=32
+about to write second[32] into the adjacent first object
+stack out-of-bounds write returned; waiting for async MTE fault
+EXIT_STATUS=0
+
+=== variant=protected case=normal ===
+heap first=0x400b7cdcc01c080 tag=4 second=0x500b7cdcc01c0a0 tag=5
+stack first=0xf00b7cdcbffffe0 tag=15 second=0xe00b7cdcbffffc0 tag=14 index=31
+normal accesses completed
+EXIT_STATUS=0
+
+=== variant=protected case=heap-oob ===
+heap first=0x400c1159a01c080 tag=4 second=0x500c1159a01c0a0 tag=5
+about to write first[32] (one byte beyond the 32-byte object)
+caught SIGSEGV: si_code=8 kind=SEGV_MTEAERR (asynchronous MTE tag check fault) si_addr=(nil)
+EXIT_STATUS=139
+
+=== variant=protected case=stack-oob ===
+stack first=0xf00c82182ffffe0 tag=15 second=0xe00c82182ffffc0 tag=14 index=32
+about to write second[32] into the adjacent first object
+caught SIGSEGV: si_code=8 kind=SEGV_MTEAERR (asynchronous MTE tag check fault) si_addr=(nil)
+EXIT_STATUS=139
+

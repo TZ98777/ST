@@ -1,0 +1,14 @@
+# StickyTags source versions
+
+Recorded for this reproduction repository on 2026-08-19.
+
+Main repository:
+
+- URL: https://github.com/vusec/stickytags.git
+- Commit: db3ba2616ce0935fba6352192a43010ba9d3172a
+
+Submodules:
+
+- spectre-mte: 9623aa8a6c5ca7cec937faefcea72981beee8c09
+
+The full upstream checkout is not vendored in this repository. Recreate it from the URL and commit above, then use the scripts under `Experiment/` as the local reproduction record.

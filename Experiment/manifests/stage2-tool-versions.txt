@@ -1,0 +1,12 @@
+git version 2.53.0
+cmake version 4.2.3
+1.13.2
+Ubuntu clang version 21.1.8 (6ubuntu1)
+QEMU emulator version 10.2.1 (Debian 1:10.2.1+ds-1ubuntu3.2)
+aarch64-linux-gnu-gcc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+  mte=<bool>             - Set on/off to enable/disable emulating a guest CPU which implements the ARM Memory Tagging Extension
+               total        used        free      shared  buff/cache   available
+Mem:           7.6Gi       623Mi       6.7Gi       3.6Mi       447Mi       7.0Gi
+Swap:          2.0Gi          0B       2.0Gi
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sdd       1007G  3.7G  952G   1% /

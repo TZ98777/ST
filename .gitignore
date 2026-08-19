@@ -1,0 +1,42 @@
+# Local build output
+build/
+out/
+dist/
+tmp/
+.cache/
+
+# Compiled artifacts
+*.o
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+
+# Archives and VM images
+*.tar
+*.tar.gz
+*.zip
+*.7z
+*.qcow2
+*.img
+*.iso
+*.vhdx
+
+# Papers and generated office artifacts
+*.pdf
+*.docx
+*.pptx
+
+# Editor and OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs and result files in this project are intentional evidence.
+!Experiment/logs/
+!Experiment/logs/**
+!results/
+!results/**

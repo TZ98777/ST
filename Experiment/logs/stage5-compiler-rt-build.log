@@ -1,0 +1,26 @@
+[1/7] Building CXX object lib/interception/CMakeFiles/RTInterception.aarch64.dir/interception_mac.cpp.o
+[2/7] Building CXX object lib/interception/CMakeFiles/RTInterception.aarch64.dir/interception_linux.cpp.o
+[3/7] Building CXX object lib/interception/CMakeFiles/RTInterception.aarch64.dir/interception_win.cpp.o
+[4/7] Building CXX object lib/interception/CMakeFiles/RTInterception.aarch64.dir/interception_type_test.cpp.o
+[5/7] Building CXX object lib/safestack/CMakeFiles/clang_rt.safestack-aarch64.dir/safestack.cpp.o
+/home/brave/stickytags-lab/src/stickytags/llvm-project/compiler-rt/lib/safestack/safestack.cpp:154:16: warning: unused variable 'kStackAlign' [-Wunused-const-variable]
+const unsigned kStackAlign = 16;
+               ^
+/home/brave/stickytags-lab/src/stickytags/llvm-project/compiler-rt/lib/safestack/safestack.cpp:163:5: warning: unused variable 'uffd' [-Wunused-variable]
+int uffd = -1;
+    ^
+/home/brave/stickytags-lab/src/stickytags/llvm-project/compiler-rt/lib/safestack/safestack.cpp:164:24: warning: unused variable 'uffdio_register' [-Wunused-variable]
+struct uffdio_register uffdio_register;
+                       ^
+/home/brave/stickytags-lab/src/stickytags/llvm-project/compiler-rt/lib/safestack/safestack.cpp:165:11: warning: unused variable 'uffd_thread' [-Wunused-variable]
+pthread_t uffd_thread;
+          ^
+/home/brave/stickytags-lab/src/stickytags/llvm-project/compiler-rt/lib/safestack/safestack.cpp:192:6: warning: unused function 'add_stack_span' [-Wunused-function]
+void add_stack_span(uintptr_t stack_bottom, uintptr_t size, uintptr_t size_class)
+     ^
+/home/brave/stickytags-lab/src/stickytags/llvm-project/compiler-rt/lib/safestack/safestack.cpp:267:14: warning: unused function 'handler' [-Wunused-function]
+static void *handler(void *arg)
+             ^
+6 warnings generated.
+[6/7] Linking CXX static library lib/linux/libclang_rt.safestack-aarch64.a
+[7/7] Generating exported symbols for clang_rt.safestack-aarch64

@@ -1,0 +1,8 @@
+Building the same test without SafeStack and StickyTags TCMalloc
+/home/brave/stickytags-lab/artifacts/aarch64/bin/unprotected-functional: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, with debug_info, not stripped
+Dynamic dependencies:
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+SafeStack symbol count (expected 0):
+0
+TCMalloc dependency count (expected 0):
+0

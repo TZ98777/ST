@@ -1,0 +1,39 @@
+=== capture time ===
+2026-08-18T13:31:52+08:00
+
+=== source revisions ===
+db3ba2616ce0935fba6352192a43010ba9d3172a
+ 9623aa8a6c5ca7cec937faefcea72981beee8c09 spectre-mte (heads/main)
+working tree changes: 0
+
+=== host-side tools ===
+clang version 16.0.0 (https://github.com/vusec/stickytags.git db3ba2616ce0935fba6352192a43010ba9d3172a)
+Target: unknown
+QEMU emulator version 10.2.1 (Debian 1:10.2.1+ds-1ubuntu3.2)
+cmake version 4.2.3
+1.13.2
+
+=== AArch64 artifacts ===
+/home/brave/stickytags-lab/artifacts/aarch64/bin/stickytags-functional: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, with debug_info, not stripped
+/home/brave/stickytags-lab/artifacts/aarch64/bin/unprotected-functional: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, with debug_info, not stripped
+/home/brave/stickytags-lab/artifacts/aarch64/lib/libtcmalloc.so.4.5.10: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, not stripped
+dc6ee03da38e76428e8e5ff379355faec2502b0c0f3a2cad91418dc98325907f  /home/brave/stickytags-lab/artifacts/aarch64/bin/stickytags-functional
+ba06197348e856f19edb2b1f0d46632626bf9f4815b60b2b6fd9ec0037e706f8  /home/brave/stickytags-lab/artifacts/aarch64/bin/unprotected-functional
+2f11482e13b0e5448338a584e9230c965181f09ee4fe1e7499d1ea4597f6348f  /home/brave/stickytags-lab/artifacts/aarch64/bin/repository-test
+2e62e71ae6df00475b34925feec71dfc25f6e5a841e66bafc0fbe4abe6ddfc63  /home/brave/stickytags-lab/artifacts/aarch64/lib/libtcmalloc.so.4.5.10
+
+=== protected binary evidence ===
+ 0x000000000000001d (RUNPATH)            Library runpath: [/opt/stickytags/lib]
+ 0x0000000000000001 (NEEDED)             Shared library: [libtcmalloc.so.4]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libresolv.so.2]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+0000000000011adc T __safestack_init
+
+=== baseline binary evidence ===
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+SafeStack symbols: 0
+TCMalloc dependencies: 0
+
+=== running QEMU process ===
+    461    01:32:20 31.3 14.5 qemu-system-aarch64 -name stickytags-arm64-mte -machine virt,mte=on -cpu max -accel tcg,thread=multi -smp 2 -m 2048 -kernel /home/brave/stickytags-lab/vm/boot/Image-6.8.0-137-generic -initrd /home/brave/stickytags-lab/vm/boot/initrd.img-6.8.0-137-generic -append root=/dev/vda1 rw rootwait console=ttyAMA0 earlycon=pl011,0x09000000 fstab=no apparmor=0 systemd.mask=apparmor.service systemd.mask=multipathd.service systemd.show_status=yes -drive if=none,file=/home/brave/stickytags-lab/vm/images/stickytags-arm64-overlay.qcow2,format=qcow2,id=osdisk -device virtio-blk-pci,drive=osdisk -drive if=none,file=/home/brave/stickytags-lab/vm/cloud-init/seed.img,format=raw,readonly=on,id=seed -device virtio-blk-pci,drive=seed -netdev user,id=net0,hostfwd=tcp:127.0.0.1:2222-:22 -device virtio-net-pci,netdev=net0 -device virtio-rng-pci -display none -serial file:/home/brave/stickytags-lab/logs/qemu-mte-console.log -monitor none -daemonize -pidfile /home/brave/stickytags-lab/vm/qemu-mte.pid

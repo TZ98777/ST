@@ -1,0 +1,111 @@
+=== guest environment ===
+2026-08-18T04:23:03+00:00
+Linux stickytags-arm64 6.8.0-137-generic #137-Ubuntu SMP PREEMPT_DYNAMIC Fri Jul 17 19:15:13 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+4096
+Features	: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm ssbs sb paca pacg dcpodp sve2 sveaes svepmull svebitperm svesha3 svesm4 flagm2 frint svei8mm svef32mm svef64mm svebf16 i8mm bf16 dgh rng bti mte ecv afp rpres mte3 wfxt ebf16 sveebf16 cssc sve2p1 mops hbc sveb16b16 lse128
+vm.unprivileged_userfaultfd = 1
+tagged address control before tests: Threads:	1 SigQ:	0/7551 
+=== case: normal ===
+heap first=0x400aedcd401c080 tag=4 second=0x500aedcd401c0a0 tag=5
+stack first=0xf00aedcd3ffffe0 tag=15 second=0xe00aedcd3ffffc0 tag=14 index=31
+normal accesses completed
+EXIT_STATUS=0
+
+=== case: repository-test ===
+ptr0 0xad1417024000 ptr1 0x100ad1417024030 ptr2 0x200ad1417024060
+buf16 0xf00ad14167fffc0 buf15 0xe00ad14167fff80 buf14 0xf00ad1416ffff80
+EXIT_STATUS=1
+
+=== case: heap-oob ===
+heap first=0x400b38c8b01c080 tag=4 second=0x500b38c8b01c0a0 tag=5
+about to write first[32] (one byte beyond the 32-byte object)
+caught SIGSEGV: si_code=8 kind=SEGV_MTEAERR (asynchronous MTE tag check fault) si_addr=(nil)
+EXIT_STATUS=139
+
+=== case: stack-oob ===
+stack first=0xf00b20548ffffe0 tag=15 second=0xe00b20548ffffc0 tag=14 index=32
+about to write second[32] into the adjacent first object
+caught SIGSEGV: si_code=8 kind=SEGV_MTEAERR (asynchronous MTE tag check fault) si_addr=(nil)
+EXIT_STATUS=139
+
+=== recent kernel messages ===
+[   45.864181] raid6: int64x8  gen()   610 MB/s
+[   45.881128] raid6: int64x4  gen()   304 MB/s
+[   45.898074] raid6: int64x2  gen()   836 MB/s
+[   45.915023] raid6: int64x1  gen()   602 MB/s
+[   45.915523] raid6: using algorithm neonx8 gen() 1072 MB/s
+[   45.933128] raid6: .... xor() 382 MB/s, rmw enabled
+[   45.933755] raid6: using neon recovery algorithm
+[   45.999651] xor: measuring software checksum speed
+[   46.005499]    8regs           :  1067 MB/sec
+[   46.009407]    32regs          :  1199 MB/sec
+[   46.015289]    arm64_neon      :   597 MB/sec
+[   46.015752] xor: using function: 32regs (1199 MB/sec)
+[   46.047760] async_tx: api initialized (async)
+[   49.245575] Btrfs loaded, zoned=yes, fsverity=yes
+[   49.291228] hrtimer: interrupt took 2986552 ns
+[   50.829628] EXT4-fs (vda1): mounted filesystem 1ba75f54-4264-4bb5-9c98-539478e78f9e r/w with ordered data mode. Quota mode: none.
+[   56.070708] systemd[1]: System time before build time, advancing clock.
+[   56.402775] systemd[1]: Inserted module 'autofs4'
+[   57.030499] systemd[1]: systemd 255.4-1ubuntu8.17 running in system mode (+PAM +AUDIT +SELINUX +APPARMOR +IMA +SMACK +SECCOMP +GCRYPT -GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 -IDN +IPTC +KMOD +LIBCRYPTSETUP +LIBFDISK +PCRE2 -PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD -BPF_FRAMEWORK -XKBCOMMON +UTMP +SYSVINIT default-hierarchy=unified)
+[   57.033808] systemd[1]: Detected virtualization qemu.
+[   57.035524] systemd[1]: Detected architecture arm64.
+[   57.099198] systemd[1]: Hostname set to <stickytags-arm64>.
+[   73.208152] systemd[1]: Queued start job for default target graphical.target.
+[   73.626723] systemd[1]: Created slice system-modprobe.slice - Slice /system/modprobe.
+[   73.678203] systemd[1]: Created slice system-serial\x2dgetty.slice - Slice /system/serial-getty.
+[   73.705611] systemd[1]: Created slice user.slice - User and Session Slice.
+[   73.721114] systemd[1]: Started systemd-ask-password-wall.path - Forward Password Requests to Wall Directory Watch.
+[   73.756822] systemd[1]: Set up automount proc-sys-fs-binfmt_misc.automount - Arbitrary Executable File Formats File System Automount Point.
+[   73.769679] systemd[1]: Expecting device dev-ttyAMA0.device - /dev/ttyAMA0...
+[   73.777896] systemd[1]: Reached target integritysetup.target - Local Integrity Protected Volumes.
+[   73.786489] systemd[1]: Reached target slices.target - Slice Units.
+[   73.793057] systemd[1]: Reached target snapd.mounts-pre.target - Mounting snaps.
+[   73.800247] systemd[1]: Reached target snapd.mounts.target - Mounted snaps.
+[   73.806652] systemd[1]: Reached target swap.target - Swaps.
+[   73.814168] systemd[1]: Reached target veritysetup.target - Local Verity Protected Volumes.
+[   73.832554] systemd[1]: Listening on dm-event.socket - Device-mapper event daemon FIFOs.
+[   73.859527] systemd[1]: Listening on lvm2-lvmpolld.socket - LVM2 poll daemon socket.
+[   73.871512] systemd[1]: multipathd.socket: Socket service multipathd.service not loaded, refusing.
+[   73.873543] systemd[1]: Failed to listen on multipathd.socket - multipathd control socket.
+[   73.893546] systemd[1]: Listening on syslog.socket - Syslog Socket.
+[   73.906425] systemd[1]: Listening on systemd-initctl.socket - initctl Compatibility Named Pipe.
+[   73.924660] systemd[1]: Listening on systemd-journald-dev-log.socket - Journal Socket (/dev/log).
+[   73.942508] systemd[1]: Listening on systemd-journald.socket - Journal Socket.
+[   73.960341] systemd[1]: Listening on systemd-networkd.socket - Network Service Netlink Socket.
+[   73.968793] systemd[1]: systemd-pcrextend.socket - TPM2 PCR Extension (Varlink) was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[   73.985274] systemd[1]: Listening on systemd-udevd-control.socket - udev Control Socket.
+[   73.999268] systemd[1]: Listening on systemd-udevd-kernel.socket - udev Kernel Socket.
+[   74.132790] systemd[1]: Mounting dev-hugepages.mount - Huge Pages File System...
+[   74.358816] systemd[1]: Mounting dev-mqueue.mount - POSIX Message Queue File System...
+[   74.702713] systemd[1]: Mounting sys-kernel-debug.mount - Kernel Debug File System...
+[   75.151323] systemd[1]: Mounting sys-kernel-tracing.mount - Kernel Trace File System...
+[   76.351288] systemd[1]: Starting systemd-journald.service - Journal Service...
+[   76.866808] systemd[1]: Starting keyboard-setup.service - Set the console keyboard layout...
+[   77.132454] systemd[1]: Starting kmod-static-nodes.service - Create List of Static Device Nodes...
+[   77.570313] systemd[1]: Starting lvm2-monitor.service - Monitoring of LVM2 mirrors, snapshots etc. using dmeventd or progress polling...
+[   78.149732] systemd[1]: Starting modprobe@configfs.service - Load Kernel Module configfs...
+[   79.156548] systemd[1]: Starting modprobe@dm_mod.service - Load Kernel Module dm_mod...
+[   80.424303] systemd[1]: Starting modprobe@drm.service - Load Kernel Module drm...
+[   82.380423] systemd[1]: Starting modprobe@efi_pstore.service - Load Kernel Module efi_pstore...
+[   82.523201] systemd-journald[279]: Collecting audit messages is disabled.
+[   84.279431] systemd[1]: Starting modprobe@fuse.service - Load Kernel Module fuse...
+[   86.227584] systemd[1]: Starting modprobe@loop.service - Load Kernel Module loop...
+[   86.352542] systemd[1]: netplan-ovs-cleanup.service - OpenVSwitch configuration for cleanup was skipped because of an unmet condition check (ConditionFileIsExecutable=/usr/bin/ovs-vsctl).
+[   86.480494] systemd[1]: snapd.apparmor.service - Load AppArmor profiles managed internally by snapd was skipped because of an unmet condition check (ConditionSecurity=apparmor).
+[   86.889694] systemd[1]: systemd-hwdb-update.service - Rebuild Hardware Database was skipped because of an unmet condition check (ConditionNeedsUpdate=/etc).
+[   88.472778] systemd[1]: Starting systemd-modules-load.service - Load Kernel Modules...
+[   88.555708] systemd[1]: systemd-pcrmachine.service - TPM2 PCR Machine ID Measurement was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[   90.150701] systemd[1]: Starting systemd-random-seed.service - Load/Save OS Random Seed...
+[   90.301604] systemd[1]: systemd-tpm2-setup-early.service - TPM2 SRK Setup (Early) was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[   90.344198] systemd[1]: systemd-tpm2-setup.service - TPM2 SRK Setup was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[   90.986451] systemd[1]: Starting systemd-udev-trigger.service - Coldplug All udev Devices...
+[   92.514557] systemd[1]: Started systemd-journald.service - Journal Service.
+[  101.210730] systemd-journald[279]: Received client request to flush runtime journal.
+[  101.542493] systemd-journald[279]: /var/log/journal/53da39d6ccc742f5af73d4a8c3125899/system.journal: Realtime clock jumped backwards relative to last journal entry, rotating.
+[  101.551647] systemd-journald[279]: Rotating system journal.
+[  206.868488] ISO 9660 Extensions: Microsoft Joliet Level 3
+[  206.899263] ISO 9660 Extensions: RRIP_1991A
+[  416.138426] fbcon: Taking over console
+[  470.654463] loop0: detected capacity change from 0 to 8
+[  506.530295] systemd-journald[279]: /var/log/journal/53da39d6ccc742f5af73d4a8c3125899/user-1000.journal: Journal file uses a different sequence number ID, rotating.

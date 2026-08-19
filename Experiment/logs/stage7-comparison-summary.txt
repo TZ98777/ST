@@ -1,0 +1,7 @@
+variant,case,runs,mte_faults,detection_rate_percent
+baseline,heap-oob,20,0,0.0
+baseline,normal,1,0,0.0
+baseline,stack-oob,20,0,0.0
+protected,heap-oob,20,20,100.0
+protected,normal,1,0,0.0
+protected,stack-oob,20,20,100.0

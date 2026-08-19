@@ -1,0 +1,21 @@
+=== clang version ===
+clang version 16.0.0 (https://github.com/vusec/stickytags.git db3ba2616ce0935fba6352192a43010ba9d3172a)
+Target: unknown
+Thread model: posix
+InstalledDir: /home/brave/stickytags-lab/build/llvm-rel-gcc13/bin
+=== lld version ===
+LLD 16.0.0 (compatible with GNU linkers)
+=== LLVM IR ===
+target triple = "aarch64-unknown-linux-gnu"
+define dso_local i32 @main() #0 {
+=== AArch64 object ===
+/home/brave/stickytags-lab/build/toolchain-validation/toolchain-smoke.o: ELF 64-bit LSB relocatable, ARM aarch64, version 1 (SYSV), not stripped
+  Class:                             ELF64
+  Machine:                           AArch64
+=== SafeStack transform ===
+; Function Attrs: nofree nounwind safestack uwtable
+define dso_local i32 @main() local_unnamed_addr #0 {
+attributes #0 = { nofree nounwind safestack uwtable "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+crc,+dotprod,+fp-armv8,+lse,+mte,+neon,+outline-atomics,+ras,+rcpc,+rdm,+v8.1a,+v8.2a,+v8.3a,+v8.4a,+v8.5a,+v8a,-fmv" }
+=== SafeStack full-LTO executable ===
+/home/brave/stickytags-lab/build/toolchain-validation/toolchain-smoke-safestack-aarch64: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, with debug_info, not stripped
+000000000001155c T __safestack_init

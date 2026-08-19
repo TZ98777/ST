@@ -1,0 +1,53 @@
+StickyTags reproduction checkpoint
+Saved: 2026-08-18 (Asia/Shanghai)
+
+SAFE TO SHUT DOWN
+- ARM64 QEMU guest was shut down cleanly.
+- No qemu-system-aarch64, cmake, or ninja process is running.
+- LLVM compilation has not started, so there is no partial build to preserve.
+- The StickyTags source worktree is clean.
+- The qcow2 overlay is healthy (corrupt: false), virtual size 30 GiB,
+  physical size about 64.6 MiB.
+
+COMPLETED
+1. Downloaded and verified Ubuntu 24.04 ARM64 cloud image.
+2. Created a 30 GiB qcow2 overlay and NoCloud seed image.
+3. Diagnosed AAVMF + QEMU -cpu max firmware stall.
+4. Extracted Ubuntu ARM64 kernel/initrd and switched to direct kernel boot.
+5. Created reusable launcher:
+   F:\Paper\StickyTags\Experiment\start-mte-vm.sh
+6. Booted Ubuntu 24.04.4 ARM64 with QEMU machine virt,mte=on and CPU max.
+7. Completed cloud-init and SSH key login as user brave.
+8. Verified:
+   - aarch64 guest
+   - Linux 6.8.0-137-generic
+   - 4096-byte pages
+   - CPU Features include mte and mte3
+   - HWCAP2_MTE=yes
+   - mmap(PROT_MTE)=ok
+   - PR_SET_TAGGED_ADDR_CTRL=ok
+   - vm.unprivileged_userfaultfd=1
+9. Saved evidence log:
+   F:\Paper\StickyTags\Experiment\logs\stage3-arm64-mte-validation.txt
+
+CURRENT PLAN STATUS
+- ARM64+MTE VM and SSH: complete
+- MTE/page size/userfaultfd validation: complete
+- Modified LLVM/Clang build: next (not started)
+- compiler-rt and StickyTags TCMalloc build: pending
+- Functional and deterministic overflow tests: pending
+- Report evidence organization: pending
+
+NEXT SESSION
+1. Open Codex and say: "继续 StickyTags 复现，从 LLVM 构建恢复点开始。"
+2. Configure the modified LLVM/Clang in WSL as an x86-hosted compiler that
+   emits AArch64 code. Keep build products under:
+   /home/brave/stickytags-lab/build/
+3. Use conservative Ninja parallelism (initially -j2) because WSL has about
+   7.6 GiB RAM and 2 GiB swap.
+4. Do not start QEMU during the LLVM build; restart it only for guest tests.
+
+IMPORTANT RULE
+- Before adding any problem/solution entry to
+  F:\Paper\StickyTags\复现过程解决问题.md, explain the proposed entry and ask
+  the user for permission.

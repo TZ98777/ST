@@ -1,0 +1,63 @@
+=== installed libraries ===
+-rw-r--r-- 1 brave brave 696K Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc.a
+-rwxr-xr-x 1 brave brave 1010 Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc.la
+lrwxrwxrwx 1 brave brave   21 Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc.so -> libtcmalloc.so.4.5.10
+lrwxrwxrwx 1 brave brave   21 Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc.so.4 -> libtcmalloc.so.4.5.10
+-rwxr-xr-x 1 brave brave 459K Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc.so.4.5.10
+-rw-r--r-- 1 brave brave 753K Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_and_profiler.a
+-rwxr-xr-x 1 brave brave 1.1K Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_and_profiler.la
+lrwxrwxrwx 1 brave brave   33 Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_and_profiler.so -> libtcmalloc_and_profiler.so.4.6.5
+lrwxrwxrwx 1 brave brave   33 Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_and_profiler.so.4 -> libtcmalloc_and_profiler.so.4.6.5
+-rwxr-xr-x 1 brave brave 424K Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_and_profiler.so.4.6.5
+-rw-r--r-- 1 brave brave 740K Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_debug.a
+-rwxr-xr-x 1 brave brave 1.1K Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_debug.la
+lrwxrwxrwx 1 brave brave   27 Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_debug.so -> libtcmalloc_debug.so.4.5.10
+lrwxrwxrwx 1 brave brave   27 Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_debug.so.4 -> libtcmalloc_debug.so.4.5.10
+-rwxr-xr-x 1 brave brave 484K Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_debug.so.4.5.10
+-rw-r--r-- 1 brave brave 367K Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_minimal.a
+-rwxr-xr-x 1 brave brave 1.1K Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_minimal.la
+lrwxrwxrwx 1 brave brave   29 Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_minimal.so -> libtcmalloc_minimal.so.4.5.10
+lrwxrwxrwx 1 brave brave   29 Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_minimal.so.4 -> libtcmalloc_minimal.so.4.5.10
+-rwxr-xr-x 1 brave brave 286K Aug 18 11:43 /home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc_minimal.so.4.5.10
+=== ELF architecture ===
+/home/brave/stickytags-lab/build/gperftools-aarch64-install/lib/libtcmalloc.so.4.5.10: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, not stripped
+  Class:                             ELF64
+  Machine:                           AArch64
+=== allocator symbols ===
+000000000007f348 V _ZGVN8tcmalloc20STLPageHeapAllocatorINS_15StackTraceTable5EntryEvE11underlying_E
+000000000007f308 V _ZGVN8tcmalloc20STLPageHeapAllocatorISt13_Rb_tree_nodeINS_17SpanPtrWithLengthEEvE11underlying_E
+000000000007ee5f B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead22FLAGS_malloc_skip_mmapE
+000000000007ee5d B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead22FLAGS_malloc_skip_sbrkE
+000000000007ee60 B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead24FLAGS_nomalloc_skip_mmapE
+000000000007ee5e B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead24FLAGS_nomalloc_skip_sbrkE
+000000000007ef0d B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead30FLAGS_memfs_malloc_map_privateE
+000000000007ef09 B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead32FLAGS_memfs_malloc_abort_on_failE
+000000000007ef0e B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead32FLAGS_nomemfs_malloc_map_privateE
+000000000007ef0a B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead34FLAGS_nomemfs_malloc_abort_on_failE
+000000000007ee61 B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead35FLAGS_malloc_disable_memory_releaseE
+000000000007ef0f B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead35FLAGS_memfs_malloc_disable_fallbackE
+000000000007ef0b B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead35FLAGS_memfs_malloc_ignore_mmap_failE
+000000000007ee62 B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead37FLAGS_nomalloc_disable_memory_releaseE
+000000000007ef10 B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead37FLAGS_nomemfs_malloc_disable_fallbackE
+000000000007ef0c B _ZN60FLAG__namespace_do_not_use_directly_use_DECLARE_bool_instead37FLAGS_nomemfs_malloc_ignore_mmap_failE
+000000000007ee58 B _ZN61FLAG__namespace_do_not_use_directly_use_DECLARE_int32_instead25FLAGS_malloc_devmem_limitE
+000000000007ee50 B _ZN61FLAG__namespace_do_not_use_directly_use_DECLARE_int32_instead25FLAGS_malloc_devmem_startE
+000000000007ee5c B _ZN61FLAG__namespace_do_not_use_directly_use_DECLARE_int32_instead27FLAGS_nomalloc_devmem_limitE
+000000000007ee54 B _ZN61FLAG__namespace_do_not_use_directly_use_DECLARE_int32_instead27FLAGS_nomalloc_devmem_startE
+000000000007ef00 B _ZN61FLAG__namespace_do_not_use_directly_use_DECLARE_int64_instead27FLAGS_memfs_malloc_limit_mbE
+000000000007ef70 B _ZN61FLAG__namespace_do_not_use_directly_use_DECLARE_int64_instead28FLAGS_tcmalloc_heap_limit_mbE
+000000000007ef08 B _ZN61FLAG__namespace_do_not_use_directly_use_DECLARE_int64_instead29FLAGS_nomemfs_malloc_limit_mbE
+000000000007ef78 B _ZN61FLAG__namespace_do_not_use_directly_use_DECLARE_int64_instead30FLAGS_notcmalloc_heap_limit_mbE
+000000000007f310 B _ZN61FLAG__namespace_do_not_use_directly_use_DECLARE_int64_instead31FLAGS_tcmalloc_sample_parameterE
+000000000007f318 B _ZN61FLAG__namespace_do_not_use_directly_use_DECLARE_int64_instead33FLAGS_notcmalloc_sample_parameterE
+000000000007aa48 B _ZN61FLAG__namespace_do_not_use_directly_use_DECLARE_int64_instead43FLAGS_tcmalloc_large_alloc_report_thresholdE
+000000000007aa50 B _ZN61FLAG__namespace_do_not_use_directly_use_DECLARE_int64_instead45FLAGS_notcmalloc_large_alloc_report_thresholdE
+000000000007ef60 B _ZN62FLAG__namespace_do_not_use_directly_use_DECLARE_double_instead27FLAGS_tcmalloc_release_rateE
+000000000007ef68 B _ZN62FLAG__namespace_do_not_use_directly_use_DECLARE_double_instead29FLAGS_notcmalloc_release_rateE
+=== MTE instructions ===
+   43d0c:	9adf1000 	irg	x0, x0
+   43d18:	9ac11000 	irg	x0, x0, x1
+   43d20:	d9600000 	ldg	x0, [x0]
+   43d2c:	d9200800 	stg	x0, [x0]
+   43d44:	d9600800 	stzg	x0, [x0]
+=== repository status ===

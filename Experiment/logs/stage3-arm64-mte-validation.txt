@@ -1,0 +1,41 @@
+StickyTags ARM64/MTE environment validation
+2026-08-17T16:31:47+00:00
+
+=== identity ===
+uid=1000(brave) gid=1000(brave) groups=1000(brave),4(adm),27(sudo)
+=== kernel ===
+Linux stickytags-arm64 6.8.0-137-generic #137-Ubuntu SMP PREEMPT_DYNAMIC Fri Jul 17 19:15:13 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+=== architecture ===
+aarch64
+=== page size ===
+4096
+=== cpu features ===
+Features	: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm ssbs sb paca pacg dcpodp sve2 sveaes svepmull svebitperm svesha3 svesm4 flagm2 frint svei8mm svef32mm svef64mm svebf16 i8mm bf16 dgh rng bti mte ecv afp rpres mte3 wfxt ebf16 sveebf16 cssc sve2p1 mops hbc sveb16b16 lse128
+=== memory ===
+               total        used        free      shared  buff/cache   available
+Mem:           1.9Gi       153Mi       1.5Gi       940Ki       300Mi       1.8Gi
+Swap:             0B          0B          0B
+=== root filesystem ===
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda1        29G  1.8G   27G   7% /
+=== userfaultfd setting ===
+1
+=== cloud-init ===
+status: done
+extended_status: done
+boot_status_code: enabled-by-generator
+last_update: Thu, 01 Jan 1970 00:12:53 +0000
+detail: DataSourceNoCloud [seed=/dev/vdb]
+errors: []
+recoverable_errors: {}
+
+=== MTE syscall probe ===
+AT_HWCAP2=0xb817807fffff
+HWCAP2_MTE=yes
+page_size=4096
+mmap_PROT_MTE=ok
+PR_SET_TAGGED_ADDR_CTRL=ok
+
+=== enable userfaultfd ===
+vm.unprivileged_userfaultfd = 1
+effective_value=1
