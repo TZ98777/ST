@@ -16,6 +16,8 @@
 - `Experiment/logs/stage3-source-versions.txt`
 - `Experiment/logs/stage4-toolchain-validation.txt`
 
+主机脚本的可覆盖配置见 `Experiment/lab-env.sh`，虚拟机所需文件和当前缺失的镜像创建流程见 `docs/vm-assets.md`。
+
 ## 环境限制
 
 当前平台不是原生 Arm MTE 硬件。QEMU 可以验证 MTE fault 与标签行为，但不能用于复现论文中的真实硬件性能开销。因此报告中应把当前实验定位为功能与机制复现，不应把 QEMU 运行时间与论文中的 Pixel 8 Pro 或其他真实设备数据直接比较。

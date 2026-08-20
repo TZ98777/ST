@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-lab_root=/home/brave/stickytags-lab
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+source "$script_dir/lab-env.sh"
+lab_root=$STICKYTAGS_LAB_ROOT
 build_dir="$lab_root/build/llvm-rel-gcc13"
 source_file="$script_dir/tests/toolchain-smoke.c"
-log_file=/home/brave/stickytags-lab/logs/stage4-toolchain-validation.txt
+log_file="$lab_root/logs/stage4-toolchain-validation.txt"
 validation_dir="$lab_root/build/toolchain-validation"
 
 mkdir -p "$validation_dir"

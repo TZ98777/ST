@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-lab_root=/home/brave/stickytags-lab
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+source "$script_dir/lab-env.sh"
+lab_root=$STICKYTAGS_LAB_ROOT
 install_dir="$lab_root/build/gperftools-aarch64-install"
 library="$install_dir/lib/libtcmalloc.so.4.5.10"
 log_file="$lab_root/logs/stage5-gperftools-validation.txt"

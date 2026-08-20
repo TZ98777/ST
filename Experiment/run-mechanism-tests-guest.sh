@@ -5,13 +5,28 @@ binary=/opt/stickytags/bin/stickytags-mechanism
 boundary_trials=${1:-5}
 granularity_trials=${2:-20}
 persistence_iterations=${3:-1000}
+case_timeout=${4:-120}
+
+for value_name in boundary_trials granularity_trials persistence_iterations \
+                  case_timeout; do
+    value=${!value_name}
+    if [[ ! $value =~ ^[1-9][0-9]*$ ]]; then
+        echo "$value_name must be a positive integer: $value" >&2
+        exit 64
+    fi
+done
+if ((persistence_iterations < 2)); then
+    echo "persistence_iterations must be at least 2." >&2
+    exit 64
+fi
 
 run_report_case() {
     local suite=$1
     local kind=$2
     shift 2
     local output status fault_line fault_kind fault_si_code unexpected_sigsegv
-    output=$(timeout --foreground --signal=KILL 30 "$binary" "$suite" "$kind" "$@" 2>&1)
+    output=$(timeout --foreground --signal=KILL "$case_timeout" \
+        "$binary" "$suite" "$kind" "$@" 2>&1)
     status=$?
     fault_line=$(grep -E '^(MTE_FAULT|SIGSEGV_FAULT),' <<<"$output" | head -n 1)
     fault_kind=$(sed -n 's/.*kind=\([^,]*\).*/\1/p' <<<"$fault_line")
@@ -43,10 +58,10 @@ run_fault_case() {
     local fault_line fault_kind fault_si_code
 
     if [[ $suite == boundary ]]; then
-        output=$(timeout --foreground --signal=KILL 30 "$binary" \
+        output=$(timeout --foreground --signal=KILL "$case_timeout" "$binary" \
             boundary "$kind" "$size_or_index" "$param" 2>&1)
     else
-        output=$(timeout --foreground --signal=KILL 30 "$binary" \
+        output=$(timeout --foreground --signal=KILL "$case_timeout" "$binary" \
             granularity "$kind" "$param" 2>&1)
     fi
     status=$?

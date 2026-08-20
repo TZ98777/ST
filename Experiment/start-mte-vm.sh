@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LAB=/home/brave/stickytags-lab
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+source "$SCRIPT_DIR/lab-env.sh"
+LAB=$STICKYTAGS_LAB_ROOT
 VM_DIR="$LAB/vm"
 LOG_DIR="$LAB/logs"
 PID_FILE="$VM_DIR/qemu-mte.pid"
@@ -30,7 +32,7 @@ qemu-system-aarch64 \
   -device virtio-blk-pci,drive=osdisk \
   -drive if=none,file="$VM_DIR/cloud-init/seed.img",format=raw,readonly=on,id=seed \
   -device virtio-blk-pci,drive=seed \
-  -netdev user,id=net0,hostfwd=tcp:127.0.0.1:2222-:22 \
+  -netdev "user,id=net0,hostfwd=tcp:${STICKYTAGS_VM_HOST}:${STICKYTAGS_VM_PORT}-:22" \
   -device virtio-net-pci,netdev=net0 \
   -device virtio-rng-pci \
   -display none \

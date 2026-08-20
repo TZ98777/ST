@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LAB=/home/brave/stickytags-lab
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+source "$SCRIPT_DIR/lab-env.sh"
+LAB=$STICKYTAGS_LAB_ROOT
 SRC="$LAB/src/stickytags/llvm-project/llvm"
 BUILD="$LAB/build/llvm-rel-gcc13"
 LOG="$LAB/logs/stage4-llvm-configure-gcc13.log"

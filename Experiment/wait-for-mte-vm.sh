@@ -1,22 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-lab_root=/home/brave/stickytags-lab
-ssh_key=/home/brave/.ssh/stickytags_vm_ed25519
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+source "$script_dir/lab-env.sh"
+lab_root=$STICKYTAGS_LAB_ROOT
+ssh_key=$STICKYTAGS_SSH_KEY
+remote="$STICKYTAGS_VM_USER@$STICKYTAGS_VM_HOST"
 
-for attempt in {1..60}; do
+for ((attempt = 1; attempt <= STICKYTAGS_VM_WAIT_ATTEMPTS; ++attempt)); do
     if ssh \
         -i "$ssh_key" \
-        -p 2222 \
+        -p "$STICKYTAGS_VM_PORT" \
         -o BatchMode=yes \
         -o ConnectTimeout=3 \
         -o StrictHostKeyChecking=no \
-        brave@127.0.0.1 true 2>/dev/null; then
+        "$remote" true 2>/dev/null; then
         echo "SSH_READY"
         exit 0
     fi
     echo "waiting_for_ssh_$attempt"
-    sleep 5
+    sleep "$STICKYTAGS_VM_WAIT_INTERVAL"
 done
 
 echo "SSH did not become ready; latest console output follows" >&2

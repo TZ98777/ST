@@ -8,7 +8,7 @@
 
 2. 运行流程维护
 
-   负责维护 `docs/build-and-run.md` 和 `Experiment/*.sh`，让同学能够按步骤复跑实验。后续重点是把脚本中的固定路径改成可配置路径。
+   负责维护 `docs/build-and-run.md`、`docs/vm-assets.md` 和 `Experiment/*.sh`，让同学能够按步骤复跑实验。主机路径和 SSH 参数已经集中到 `Experiment/lab-env.sh`；后续重点是补充从空白系统创建 QEMU AArch64 MTE 镜像的自动化流程。
 
 3. 测试数据和结果整理
 

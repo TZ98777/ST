@@ -6,7 +6,7 @@
 
 我目前完成的是 StickyTags 的“核心机制复现”，不是完整论文复现。
 
-简单说，我已经在本机搭好了一个可以模拟 ARM MTE 的 AArch64 虚拟机，编译了 StickyTags 修改过的 LLVM/Clang、SafeStack 运行库和 TCMalloc，并写了测试程序去验证：受保护程序在发生堆和栈的相邻越界访问时会触发 MTE 标签错误，而普通未保护程序不会触发；同时，标签轮转、持久标签和 16 字节粒度这些论文核心机制也已经在测试中表现出来。
+简单说，我已经在本机搭好了一个可以模拟 ARM MTE 的 AArch64 虚拟机，编译了 StickyTags 修改过的 LLVM/Clang、SafeStack 运行库和 TCMalloc，并写了测试程序去验证：受保护程序在发生堆和栈的相邻越界访问时会触发 MTE 标签错误，而普通未保护程序不会触发；同时，标签轮转和持久标签这两个核心设计已经表现出来，MTE 16 字节粒度也通过辅助测试得到确认。
 
 还没有完成的是论文中的大规模性能评测、Juliet 测试集、真实 CVE 复现、真实 ARM 设备侧信道实验和完整内存开销测量。因此当前结果只能说明“机制跑通了”，不能说“论文所有实验都复现了”。
 
@@ -167,7 +167,7 @@ ptr0 0xaf6587024000 ptr1 0x100af6587024030 ptr2 0x200af6587024060
 buf16 0xf00af65867fffc0 buf15 0xe00af65867fff80 buf14 0xf00af6586ffff80
 ```
 
-这些地址的最高字节中出现了不同 tag，说明原仓库测试程序中的 heap 和 stack 指针都已经带有 top-byte tag。
+这些地址的最高字节中出现了不同 tag，说明原仓库测试程序中的 heap 和 stack 指针都已经带有 top-byte tag。该程序只输出布局，源码最后主动返回 1，并没有真正执行越界访问，所以它只能作为布局探针，不能作为保护效果证据。
 
 ### 4.4 `stickytags-functional.c`：最小功能测试
 
@@ -223,9 +223,9 @@ protected stack-oob: 20 次运行，20 次 MTE fault
 
 这说明相同的越界访问，在普通程序里没有被 MTE 拦下，在 StickyTags protected 程序里被拦下。
 
-### 4.5 综合机制测试程序：验证标签轮转、边界、持久性和粒度
+### 4.5 综合机制测试程序：验证标签轮转、边界、持久性和 MTE 粒度
 
-综合机制测试程序保存在实验测试源码目录中，作用是把论文中几个核心现象拆成可重复运行的小测试：标签轮转、空间边界、持久标签和 MTE 16 字节粒度。
+综合机制测试程序保存在实验测试源码目录中，作用是把三个 StickyTags 核心现象拆成可重复运行的小测试：标签轮转、空间边界和持久标签；此外还增加 MTE 16 字节粒度辅助测试，用于确认底层硬件语义。
 
 这个程序做了四类测试。
 
@@ -289,7 +289,11 @@ persistence_tag_mismatches=0
 
 这说明同一个 slot 被复用时，tag 没有因为对象生命周期变化而重新随机生成，符合 persistent memory tag 的思想。
 
+该结果验证的是固定空间布局和减少重复 retag 的设计，不代表 Use-After-Free 防护。论文明确将 temporal errors 排除在 StickyTags 的范围外。
+
 第四类是 MTE 16 字节粒度测试。
+
+这一项验证的是 Arm MTE 自身的标签粒度，不是 StickyTags 单独提出的保护机制。
 
 测试逻辑是：申请一个逻辑上 10 字节的对象，然后访问不同下标：
 
@@ -438,7 +442,7 @@ protected vs baseline difference
 - 不能证明真实 Pixel 8 Pro 或 Samsung Galaxy S22 上的表现；
 - 不能复现论文的 speculative probing 侧信道攻击；
 - 不能证明 StickyTags 是完整 memory safety 方案；
-- 不能证明它能默认解决 Use-After-Free。
+- Use-After-Free 属于论文明确排除的 temporal error，不应把持久标签结果解释为 UAF 防护。
 
 最重要的限制是：本实验使用 QEMU TCG 模拟 ARM MTE，不是真实 ARM MTE 硬件。QEMU 可以用来验证功能逻辑，但运行时间包含跨架构模拟成本，不能拿来和论文的真机性能数字直接比较。
 
@@ -551,6 +555,6 @@ run-mechanism-tests.sh
 
 ## 11. 最后结论
 
-这次复现已经达到了“让 StickyTags 核心机制在本地跑起来并用对照测试证明”的程度。最关键的证据是：同一个测试程序，普通 baseline 不触发 MTE fault，而 protected 版本在 heap 和 stack 的有界越界访问中触发了预期 fault；同时标签轮转、持久标签、16 字节粒度和 slot 1-15 保护范围都被原始日志验证。
+这次复现已经达到了“让 StickyTags 核心机制在本地跑起来并用对照测试证明”的程度。最关键的证据是：同一个测试程序，普通 baseline 不触发 MTE fault，而 protected 版本在 heap 和 stack 的有界越界访问中触发了预期 fault；同时标签轮转、持久标签和 slot 1-15 保护范围都被原始日志验证，MTE 16 字节粒度则作为底层语义得到辅助确认。
 
 下一步如果要把它提升到更完整的论文复现，需要从“机制正确”扩展到“真实工作负载、真实漏洞和性能数据”。尤其要补充 SPEC 或替代 benchmark、Juliet 或真实 CVE、内存开销测量，以及真实 ARM MTE 设备上的验证。

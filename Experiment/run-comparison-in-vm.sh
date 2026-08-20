@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-lab_root=/home/brave/stickytags-lab
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-ssh_key=/home/brave/.ssh/stickytags_vm_ed25519
+source "$script_dir/lab-env.sh"
+lab_root=$STICKYTAGS_LAB_ROOT
+ssh_key=$STICKYTAGS_SSH_KEY
+remote="$STICKYTAGS_VM_USER@$STICKYTAGS_VM_HOST"
 guest_script="$script_dir/run-comparison-guest.sh"
 artifact="$lab_root/artifacts/aarch64/bin/unprotected-functional"
 raw_log="$lab_root/logs/stage7-comparison-results.csv"
 summary_log="$lab_root/logs/stage7-comparison-summary.txt"
 trials=${1:-20}
+if [[ ! $trials =~ ^[1-9][0-9]*$ ]]; then
+    echo "trials must be a positive integer: $trials" >&2
+    exit 64
+fi
 
 ssh_options=(
     -i "$ssh_key"
-    -p 2222
+    -p "$STICKYTAGS_VM_PORT"
     -o BatchMode=yes
     -o ConnectTimeout=60
     -o ServerAliveInterval=30
@@ -21,7 +27,7 @@ ssh_options=(
 
 scp_options=(
     -i "$ssh_key"
-    -P 2222
+    -P "$STICKYTAGS_VM_PORT"
     -o BatchMode=yes
     -o ConnectTimeout=60
     -o ServerAliveInterval=30
@@ -29,12 +35,13 @@ scp_options=(
 )
 
 scp "${scp_options[@]}" "$artifact" \
-    brave@127.0.0.1:/tmp/unprotected-functional
-ssh "${ssh_options[@]}" brave@127.0.0.1 \
+    "$remote":/tmp/unprotected-functional
+ssh "${ssh_options[@]}" "$remote" \
     'sudo install -m 0755 /tmp/unprotected-functional /opt/stickytags/bin/unprotected-functional'
 
-ssh "${ssh_options[@]}" brave@127.0.0.1 \
-    "bash -s -- '$trials'" < "$guest_script" > "$raw_log"
+ssh "${ssh_options[@]}" "$remote" \
+    "bash -s -- '$trials' '$STICKYTAGS_CASE_TIMEOUT'" \
+    < "$guest_script" > "$raw_log"
 
 {
     echo "variant,case,runs,mte_faults,detection_rate_percent"
@@ -57,7 +64,7 @@ ssh "${ssh_options[@]}" brave@127.0.0.1 \
 
 cat "$summary_log"
 
-if awk -F, 'NR > 1 && $8 == 1 { found = 1 } END { exit(found ? 0 : 1) }' "$raw_log"; then
-    echo "Functional comparison contains a non-MTE segmentation fault." >&2
+if awk -F, 'NR > 1 && $10 != 1 { found = 1 } END { exit(found ? 0 : 1) }' "$raw_log"; then
+    echo "Functional comparison contains cases that do not match the expected MTE behavior." >&2
     exit 1
 fi

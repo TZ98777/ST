@@ -1,3 +1,5 @@
+#include <errno.h>
+#include <limits.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -37,6 +39,7 @@ struct persistence_state {
     int iterations;
     int reuses;
     int mismatches;
+    int tracking_overflow;
 };
 
 static volatile unsigned char byte_sink;
@@ -98,7 +101,10 @@ static void install_segv_handler(void) {
 static void configure_mte_fault_mode(void) {
     unsigned long control = PR_TAGGED_ADDR_ENABLE | PR_MTE_TCF_ASYNC |
                             (0xffffUL << PR_MTE_TAG_SHIFT);
-    (void)prctl(PR_SET_TAGGED_ADDR_CTRL, control, 0, 0, 0);
+    if (prctl(PR_SET_TAGGED_ADDR_CTRL, control, 0, 0, 0) != 0) {
+        perror("prctl(PR_SET_TAGGED_ADDR_CTRL)");
+        exit(2);
+    }
 }
 
 __attribute__((noinline)) static void escape_ptrs(volatile unsigned char **ptrs,
@@ -263,6 +269,8 @@ static void persistence_record(struct persistence_state *state,
         state->raw[state->count] = raw;
         state->tag[state->count] = tag;
         ++state->count;
+    } else {
+        state->tracking_overflow = 1;
     }
 }
 
@@ -279,11 +287,13 @@ static int heap_persistence(size_t size, int iterations) {
         persistence_record(&state, ptr);
         free((void *)ptr);
     }
-    int pass = state.mismatches == 0 && state.reuses > 0;
+    int pass = state.mismatches == 0 && state.reuses > 0 &&
+               !state.tracking_overflow;
     printf("RESULT,suite=persistence,kind=heap,size=%zu,iterations=%d,"
-           "unique_addresses=%d,reuses=%d,mismatches=%d,pass=%d\n",
+           "tracked_addresses=%d,reuses=%d,mismatches=%d,"
+           "tracking_overflow=%d,pass=%d\n",
            size, state.iterations, state.count, state.reuses,
-           state.mismatches, pass);
+           state.mismatches, state.tracking_overflow, pass);
     return pass ? 0 : 1;
 }
 
@@ -457,28 +467,35 @@ static int stack_persistence(size_t size, int iterations) {
             return 64;
         }
     }
-    int pass = state.mismatches == 0 && state.reuses > 0;
+    int pass = state.mismatches == 0 && state.reuses > 0 &&
+               !state.tracking_overflow;
     printf("RESULT,suite=persistence,kind=stack,size=%zu,iterations=%d,"
-           "unique_addresses=%d,reuses=%d,mismatches=%d,pass=%d\n",
+           "tracked_addresses=%d,reuses=%d,mismatches=%d,"
+           "tracking_overflow=%d,pass=%d\n",
            size, state.iterations, state.count, state.reuses,
-           state.mismatches, pass);
+           state.mismatches, state.tracking_overflow, pass);
     return pass ? 0 : 1;
 }
 
 static size_t parse_size(const char *text) {
     char *end = NULL;
+    errno = 0;
     unsigned long value = strtoul(text, &end, 10);
-    if (end == NULL || *end != '\0' || value == 0) {
+    if (errno == ERANGE || end == text || *end != '\0' || value == 0 ||
+        value > SIZE_MAX) {
         fprintf(stderr, "invalid size: %s\n", text);
         exit(64);
     }
     return (size_t)value;
 }
 
-static int parse_int(const char *text, const char *name) {
+static int parse_int_range(const char *text, const char *name, int minimum,
+                           int maximum) {
     char *end = NULL;
+    errno = 0;
     long value = strtol(text, &end, 10);
-    if (end == NULL || *end != '\0') {
+    if (errno == ERANGE || end == text || *end != '\0' || value < minimum ||
+        value > maximum) {
         fprintf(stderr, "invalid %s: %s\n", name, text);
         exit(64);
     }
@@ -510,19 +527,19 @@ int main(int argc, char **argv) {
     }
     if (strcmp(suite, "boundary") == 0 && argc == 5) {
         size_t size = parse_size(argv[3]);
-        int slot = parse_int(argv[4], "slot");
+        int slot = parse_int_range(argv[4], "slot", 1, 16);
         return strcmp(kind, "heap") == 0 ? heap_boundary(size, slot) :
                strcmp(kind, "stack") == 0 ? stack_boundary(size, slot) : 64;
     }
     if (strcmp(suite, "persistence") == 0 && argc == 5) {
         size_t size = parse_size(argv[3]);
-        int iterations = parse_int(argv[4], "iterations");
+        int iterations = parse_int_range(argv[4], "iterations", 2, INT_MAX);
         return strcmp(kind, "heap") == 0 ? heap_persistence(size, iterations) :
                strcmp(kind, "stack") == 0 ? stack_persistence(size, iterations)
                                             : 64;
     }
     if (strcmp(suite, "granularity") == 0 && argc == 4) {
-        int index = parse_int(argv[3], "index");
+        int index = parse_int_range(argv[3], "index", 0, 127);
         return strcmp(kind, "heap") == 0 ? heap_granularity(index) :
                strcmp(kind, "stack") == 0 ? stack_granularity(index) : 64;
     }

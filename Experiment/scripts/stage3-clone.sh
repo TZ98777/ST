@@ -2,10 +2,11 @@
 
 set -euo pipefail
 
-LAB_ROOT="$HOME/stickytags-lab"
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+source "$SCRIPT_DIR/../lab-env.sh"
+LAB_ROOT=$STICKYTAGS_LAB_ROOT
 SOURCE_ROOT="$LAB_ROOT/src"
 LOG_ROOT="$LAB_ROOT/logs"
-SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 EXPERIMENT_ROOT=$(cd -- "$SCRIPT_DIR/.." && pwd)
 REPO_ROOT="$SOURCE_ROOT/stickytags"
 PINNED_COMMIT="db3ba2616ce0935fba6352192a43010ba9d3172a"

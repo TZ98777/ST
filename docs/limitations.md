@@ -20,7 +20,10 @@
 - Juliet、真实 CVE 或真实应用数据集测试。
 - x86 analog redzone 性能对比。
 - Spectre-MTE 或其他侧信道相关实验。
-- 完整 temporal safety 或 use-after-free 防护复现。
+
+不属于本项目目标：
+
+- temporal safety 或 use-after-free 防护。论文明确将 temporal errors 排除在 StickyTags 范围外，因此这不是“尚未完成的论文功能”，也不能用持久标签测试证明。
 
 报告中建议使用如下表述：
 

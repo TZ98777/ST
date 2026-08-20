@@ -81,7 +81,7 @@ Overall checks:
 
 Summary table:
 
-| variant | suite | kind | cases | passed | skipped | failed | pass rate of executed cases |
+| variant | suite | kind | cases | comparison passed | skipped | failed | pass rate of executed cases |
 |---|---|---|---:|---:|---:|---:|---:|
 | protected | boundary | heap | 320 | 320 | 0 | 0 | 100.0% |
 | protected | boundary | stack | 320 | 320 | 0 | 0 | 100.0% |
@@ -112,6 +112,10 @@ Important baseline interpretation:
 - The baseline had `0` cycle mechanism passes, while the protected variant had
   `10`. This shows the 16-tag deterministic cycle is coming from StickyTags,
   not from normal AArch64 code.
+- In the table, `comparison passed` means that the observed result matched the
+  expectation for that variant. For example, baseline cycle rows count as
+  comparison passes precisely because the StickyTags cycle was absent; they
+  are not baseline mechanism passes.
 
 ## Conclusion
 

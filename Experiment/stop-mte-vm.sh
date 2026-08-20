@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-lab_root=/home/brave/stickytags-lab
-ssh_key=/home/brave/.ssh/stickytags_vm_ed25519
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+source "$script_dir/lab-env.sh"
+lab_root=$STICKYTAGS_LAB_ROOT
+ssh_key=$STICKYTAGS_SSH_KEY
+remote="$STICKYTAGS_VM_USER@$STICKYTAGS_VM_HOST"
 pid_file="$lab_root/vm/qemu-mte.pid"
 
 if [[ ! -f $pid_file ]] || ! kill -0 "$(cat "$pid_file")" 2>/dev/null; then
@@ -12,11 +15,11 @@ fi
 
 ssh \
     -i "$ssh_key" \
-    -p 2222 \
+    -p "$STICKYTAGS_VM_PORT" \
     -o BatchMode=yes \
     -o ConnectTimeout=30 \
     -o StrictHostKeyChecking=no \
-    brave@127.0.0.1 \
+    "$remote" \
     'sudo poweroff' || true
 
 # QEMU TCG may need longer than native hardware for systemd's final shutdown jobs.

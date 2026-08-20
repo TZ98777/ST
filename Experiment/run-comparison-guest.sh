@@ -4,8 +4,17 @@ set -uo pipefail
 protected=/opt/stickytags/bin/stickytags-functional
 baseline=/opt/stickytags/bin/unprotected-functional
 trials=${1:-20}
+case_timeout=${2:-120}
+if [[ ! $trials =~ ^[1-9][0-9]*$ ]]; then
+    echo "trials must be a positive integer: $trials" >&2
+    exit 64
+fi
+if [[ ! $case_timeout =~ ^[1-9][0-9]*$ ]]; then
+    echo "case_timeout must be a positive integer: $case_timeout" >&2
+    exit 64
+fi
 
-printf 'variant,case,trial,exit_status,mte_fault,fault_kind,fault_si_code,unexpected_sigsegv\n'
+printf 'variant,case,trial,exit_status,mte_fault,fault_kind,fault_si_code,unexpected_sigsegv,expected_mte_fault,pass\n'
 
 run_one() {
     local variant=$1
@@ -13,8 +22,10 @@ run_one() {
     local case_name=$3
     local trial=$4
     local output status fault fault_kind fault_si_code unexpected_sigsegv
+    local expected_fault expected_status pass
 
-    output=$(timeout --foreground --signal=KILL 15 "$binary" "$case_name" 2>&1)
+    output=$(timeout --foreground --signal=KILL "$case_timeout" \
+        "$binary" "$case_name" 2>&1)
     status=$?
     fault_kind=$(sed -n 's/.*kind=\(SEGV_MTE[A-Z]*\).*/\1/p' <<<"$output" | head -n 1)
     fault_si_code=$(sed -n 's/.*si_code=\([-0-9]*\).*/\1/p' <<<"$output" | head -n 1)
@@ -30,9 +41,23 @@ run_one() {
     else
         unexpected_sigsegv=0
     fi
-    printf '%s,%s,%d,%d,%d,%s,%s,%s\n' \
+    if [[ $variant == protected && $case_name != normal ]]; then
+        expected_fault=1
+        expected_status=139
+    else
+        expected_fault=0
+        expected_status=0
+    fi
+    if [[ $status -eq $expected_status && $fault -eq $expected_fault &&
+          $unexpected_sigsegv -eq 0 ]]; then
+        pass=1
+    else
+        pass=0
+    fi
+    printf '%s,%s,%d,%d,%d,%s,%s,%s,%s,%s\n' \
         "$variant" "$case_name" "$trial" "$status" "$fault" \
-        "$fault_kind" "$fault_si_code" "$unexpected_sigsegv"
+        "$fault_kind" "$fault_si_code" "$unexpected_sigsegv" \
+        "$expected_fault" "$pass"
 }
 
 run_one baseline "$baseline" normal 1

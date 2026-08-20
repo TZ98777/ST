@@ -3,10 +3,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/prctl.h>
 #include <unistd.h>
+
+#ifndef PR_SET_TAGGED_ADDR_CTRL
+#define PR_SET_TAGGED_ADDR_CTRL 55
+#endif
+#ifndef PR_TAGGED_ADDR_ENABLE
+#define PR_TAGGED_ADDR_ENABLE (1UL << 0)
+#endif
+#ifndef PR_MTE_TCF_ASYNC
+#define PR_MTE_TCF_ASYNC (1UL << 2)
+#endif
+#ifndef PR_MTE_TAG_SHIFT
+#define PR_MTE_TAG_SHIFT 3
+#endif
+
+#define ADDRESS_MASK 0x00ffffffffffffffULL
 
 static unsigned pointer_tag(const void *pointer) {
     return (unsigned)(((uintptr_t)pointer >> 56) & 0x0f);
+}
+
+static uintptr_t raw_address(const void *pointer) {
+    return ((uintptr_t)pointer) & ADDRESS_MASK;
 }
 
 static void segv_handler(int signal_number, siginfo_t *info, void *context) {
@@ -40,6 +60,15 @@ static void install_segv_handler(void) {
     sigemptyset(&action.sa_mask);
     if (sigaction(SIGSEGV, &action, NULL) != 0) {
         perror("sigaction");
+        exit(2);
+    }
+}
+
+static void configure_mte_fault_mode(void) {
+    unsigned long control = PR_TAGGED_ADDR_ENABLE | PR_MTE_TCF_ASYNC |
+                            (0xffffUL << PR_MTE_TAG_SHIFT);
+    if (prctl(PR_SET_TAGGED_ADDR_CTRL, control, 0, 0, 0) != 0) {
+        perror("prctl(PR_SET_TAGGED_ADDR_CTRL)");
         exit(2);
     }
 }
@@ -85,8 +114,19 @@ __attribute__((noinline)) static int stack_test(size_t index) {
     if (index < sizeof(first)) {
         first[index] = 0x55;
     } else {
-        puts("about to write second[32] into the adjacent first object");
-        second[index] = 0x55;
+        uintptr_t first_raw = raw_address((const void *)first);
+        uintptr_t second_raw = raw_address((const void *)second);
+        volatile unsigned char *lower = first_raw < second_raw ? first : second;
+        uintptr_t lower_raw = first_raw < second_raw ? first_raw : second_raw;
+        uintptr_t upper_raw = first_raw < second_raw ? second_raw : first_raw;
+        if (upper_raw - lower_raw != sizeof(first)) {
+            fprintf(stderr,
+                    "stack layout unavailable: raw distance=%zu, expected=%zu\n",
+                    (size_t)(upper_raw - lower_raw), sizeof(first));
+            return 3;
+        }
+        puts("about to write one byte past the lower-address stack object");
+        lower[index] = 0x55;
         puts("stack out-of-bounds write returned; waiting for async MTE fault");
         for (volatile unsigned long i = 0; i < 10000000UL; ++i) {
         }
@@ -99,6 +139,7 @@ int main(int argc, char **argv) {
     setvbuf(stdout, NULL, _IONBF, 0);
     setvbuf(stderr, NULL, _IONBF, 0);
     install_segv_handler();
+    configure_mte_fault_mode();
 
     if (argc != 2) {
         fprintf(stderr, "usage: %s normal|heap-oob|stack-oob\n", argv[0]);

@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-lab_root=/home/brave/stickytags-lab
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-ssh_key=/home/brave/.ssh/stickytags_vm_ed25519
+source "$script_dir/lab-env.sh"
+lab_root=$STICKYTAGS_LAB_ROOT
+ssh_key=$STICKYTAGS_SSH_KEY
+remote="$STICKYTAGS_VM_USER@$STICKYTAGS_VM_HOST"
 guest_script="$script_dir/run-protected-baseline-guest.sh"
 raw_log="$lab_root/logs/protected-baseline-results.txt"
 summary_log="$lab_root/logs/protected-baseline-summary.txt"
@@ -11,17 +13,29 @@ boundary_trials=${1:-5}
 granularity_trials=${2:-20}
 persistence_iterations=${3:-1000}
 
+for value_name in boundary_trials granularity_trials persistence_iterations; do
+    value=${!value_name}
+    if [[ ! $value =~ ^[1-9][0-9]*$ ]]; then
+        echo "$value_name must be a positive integer: $value" >&2
+        exit 64
+    fi
+done
+if ((persistence_iterations < 2)); then
+    echo "persistence_iterations must be at least 2." >&2
+    exit 64
+fi
+
 ssh_options=(
     -i "$ssh_key"
-    -p 2222
+    -p "$STICKYTAGS_VM_PORT"
     -o BatchMode=yes
     -o ConnectTimeout=60
     -o ServerAliveInterval=30
     -o StrictHostKeyChecking=no
 )
 
-ssh "${ssh_options[@]}" brave@127.0.0.1 \
-    "bash -s -- '$boundary_trials' '$granularity_trials' '$persistence_iterations'" \
+ssh "${ssh_options[@]}" "$remote" \
+    "bash -s -- '$boundary_trials' '$granularity_trials' '$persistence_iterations' '$STICKYTAGS_CASE_TIMEOUT'" \
     < "$guest_script" > "$raw_log"
 
 awk -F, '

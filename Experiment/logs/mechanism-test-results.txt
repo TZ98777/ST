@@ -1,4 +1,4 @@
-META,date=2026-08-19T12:25:49+00:00
+META,date=2026-08-19T14:07:15+00:00
 META,kernel=Linux stickytags-arm64 6.8.0-137-generic #137-Ubuntu SMP PREEMPT_DYNAMIC Fri Jul 17 19:15:13 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
 META,Features	: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm ssbs sb paca pacg dcpodp sve2 sveaes svepmull svebitperm svesha3 svesm4 flagm2 frint svei8mm svef32mm svef64mm svebf16 i8mm bf16 dgh rng bti mte ecv afp rpres mte3 wfxt ebf16 sveebf16 cssc sve2p1 mops hbc sveb16b16 lse128
 RESULT,suite=cycle,kind=heap,size=16,objects=32,unique_first16=16,adjacent_diff=31,repeat16=16,stride_ok=1,pass=1
@@ -11,16 +11,16 @@ RESULT,suite=cycle,kind=stack,size=32,objects=32,unique_first16=16,adjacent_diff
 RESULT,suite=cycle,kind=stack,size=64,objects=32,unique_first16=16,adjacent_diff=31,repeat16=16,stride_ok=1,pass=1
 RESULT,suite=cycle,kind=stack,size=128,objects=32,unique_first16=16,adjacent_diff=31,repeat16=16,stride_ok=1,pass=1
 RESULT,suite=cycle,kind=stack,size=256,objects=32,unique_first16=16,adjacent_diff=31,repeat16=16,stride_ok=1,pass=1
-RESULT,suite=persistence,kind=heap,size=16,iterations=1000,unique_addresses=1,reuses=999,mismatches=0,pass=1
-RESULT,suite=persistence,kind=heap,size=32,iterations=1000,unique_addresses=1,reuses=999,mismatches=0,pass=1
-RESULT,suite=persistence,kind=heap,size=64,iterations=1000,unique_addresses=1,reuses=999,mismatches=0,pass=1
-RESULT,suite=persistence,kind=heap,size=128,iterations=1000,unique_addresses=1,reuses=999,mismatches=0,pass=1
-RESULT,suite=persistence,kind=heap,size=256,iterations=1000,unique_addresses=1,reuses=999,mismatches=0,pass=1
-RESULT,suite=persistence,kind=stack,size=16,iterations=1000,unique_addresses=1,reuses=999,mismatches=0,pass=1
-RESULT,suite=persistence,kind=stack,size=32,iterations=1000,unique_addresses=1,reuses=999,mismatches=0,pass=1
-RESULT,suite=persistence,kind=stack,size=64,iterations=1000,unique_addresses=1,reuses=999,mismatches=0,pass=1
-RESULT,suite=persistence,kind=stack,size=128,iterations=1000,unique_addresses=1,reuses=999,mismatches=0,pass=1
-RESULT,suite=persistence,kind=stack,size=256,iterations=1000,unique_addresses=1,reuses=999,mismatches=0,pass=1
+RESULT,suite=persistence,kind=heap,size=16,iterations=1000,tracked_addresses=1,reuses=999,mismatches=0,tracking_overflow=0,pass=1
+RESULT,suite=persistence,kind=heap,size=32,iterations=1000,tracked_addresses=1,reuses=999,mismatches=0,tracking_overflow=0,pass=1
+RESULT,suite=persistence,kind=heap,size=64,iterations=1000,tracked_addresses=1,reuses=999,mismatches=0,tracking_overflow=0,pass=1
+RESULT,suite=persistence,kind=heap,size=128,iterations=1000,tracked_addresses=1,reuses=999,mismatches=0,tracking_overflow=0,pass=1
+RESULT,suite=persistence,kind=heap,size=256,iterations=1000,tracked_addresses=1,reuses=999,mismatches=0,tracking_overflow=0,pass=1
+RESULT,suite=persistence,kind=stack,size=16,iterations=1000,tracked_addresses=1,reuses=999,mismatches=0,tracking_overflow=0,pass=1
+RESULT,suite=persistence,kind=stack,size=32,iterations=1000,tracked_addresses=1,reuses=999,mismatches=0,tracking_overflow=0,pass=1
+RESULT,suite=persistence,kind=stack,size=64,iterations=1000,tracked_addresses=1,reuses=999,mismatches=0,tracking_overflow=0,pass=1
+RESULT,suite=persistence,kind=stack,size=128,iterations=1000,tracked_addresses=1,reuses=999,mismatches=0,tracking_overflow=0,pass=1
+RESULT,suite=persistence,kind=stack,size=256,iterations=1000,tracked_addresses=1,reuses=999,mismatches=0,tracking_overflow=0,pass=1
 RESULT,suite=boundary,kind=heap,size=16,slot=1,trial=1,expected_fault=1,exit_status=139,mte_fault=1,fault_kind=SEGV_MTEAERR,fault_si_code=8,unexpected_sigsegv=0,pass=1
 RESULT,suite=boundary,kind=heap,size=16,slot=1,trial=2,expected_fault=1,exit_status=139,mte_fault=1,fault_kind=SEGV_MTEAERR,fault_si_code=8,unexpected_sigsegv=0,pass=1
 RESULT,suite=boundary,kind=heap,size=16,slot=1,trial=3,expected_fault=1,exit_status=139,mte_fault=1,fault_kind=SEGV_MTEAERR,fault_si_code=8,unexpected_sigsegv=0,pass=1

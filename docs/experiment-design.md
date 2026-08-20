@@ -7,7 +7,7 @@
 - `Experiment/tests/stickytags-functional.c`
 - `Experiment/tests/stickytags-mechanism.c`
 
-这些测试用例专门覆盖 StickyTags 的核心机制：堆对象、栈对象、相邻对象越界、16 标签周期、地址复用标签持久性和 MTE 16 字节粒度。
+这些测试用例覆盖堆对象、栈对象、相邻对象越界、16 标签周期和地址复用标签持久性。MTE 16 字节粒度测试用于确认底层硬件语义，不单独证明 StickyTags 机制。上游 `test/test.c` 只输出地址和标签布局，不执行越界访问，因此归类为布局探针。
 
 ## 实验步骤
 
@@ -26,7 +26,7 @@
 | baseline | 0/20 faults | 0/20 faults |
 | protected | 20/20 faults | 20/20 faults |
 
-解释：未保护程序不会因为测试中的越界访问触发 MTE fault；protected 程序在堆和栈越界测试中均稳定触发 fault。
+解释：在当前 20 轮合成测试中，未保护程序没有产生 MTE fault；protected 程序的堆、栈越界用例均产生了专用 MTE fault。功能对照脚本现在逐行检查期望结果，保护版本未触发 MTE、未保护版本意外触发 MTE、正常访问异常退出或出现普通 `SIGSEGV` 都会导致脚本失败。
 
 ## 核心机制验证实验结果
 
@@ -66,5 +66,7 @@
 | persistence_tag_mismatches | 0 | 0 |
 
 解释：protected 版本表现出 StickyTags 的 16 标签轮转和越界 fault 行为；680 个故障均由 `SEGV_MTEAERR` 专用故障码确认，普通段错误数量为 0。baseline 没有 StickyTags size-class 布局的 400 个用例记录为 `SKIP`，不计作通过或失败；其余实际执行的 baseline 用例没有产生 MTE fault。
+
+持久性测试证明的是“同一对象槽的标签在地址复用时保持稳定”，用于验证持久标签布局。它不验证 use-after-free 防护，因为论文将 temporal errors 排除在 StickyTags 的保护范围外。
 
 原始数据见 `Experiment/logs/`，整理摘要见 `results/summary/`。

@@ -8,7 +8,7 @@
 
 - heap 和 stack 对象使用带 tag 的指针。
 - size-class slot 中 tag 呈确定性 round-robin 循环。
-- slot 1-15 的相邻越界访问触发 MTE fault，slot 16 因 tag 循环不触发 fault。
+- 同一 size class 中 slot 1-15 的越界访问触发 MTE fault，slot 16 因 tag 循环不触发 fault。
 - 复用同一地址时 tag 保持稳定，体现 persistent memory tag 行为。
 - protected 版本和 baseline 版本在同一测试输入下表现不同，差异来自 StickyTags 机制。
 
@@ -75,7 +75,7 @@ ptr0 0xaf6587024000 ptr1 0x100af6587024030 ptr2 0x200af6587024060
 buf16 0xf00af65867fffc0 buf15 0xe00af65867fff80 buf14 0xf00af6586ffff80
 ```
 
-该输出说明原仓库测试程序中的 heap 和 stack 指针都带有 top-byte tag。
+该输出说明原仓库测试程序中的 heap 和 stack 指针都带有 top-byte tag。需要注意，`test/test.c` 只打印布局并按源码主动返回 1，没有执行越界访问，因此它是布局探针，不是保护效果测试。
 
 ## 5. 核心机制验证实验
 

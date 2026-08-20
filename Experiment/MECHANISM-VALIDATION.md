@@ -69,6 +69,9 @@ Build verification from `mechanism-test-build.log`:
    expected to fault. This is tested for both heap and stack objects, 20 trials
    per index.
 
+   This is an auxiliary check of MTE hardware semantics, not a StickyTags
+   mechanism by itself.
+
 ## Core Mechanism Validation Results
 
 Raw result records: `logs/mechanism-test-results.txt`
@@ -115,6 +118,10 @@ core mechanism beyond two representative overflows:
 - distance-sensitive spatial protection
 - tag persistence on address reuse
 - MTE 16-byte granularity behavior
+
+The persistence result validates the fixed spatial tag layout and the absence
+of repeated retagging. It is not evidence of use-after-free protection;
+temporal errors are outside the scope of StickyTags.
 
 It is still not a full paper reproduction. It does not reproduce the paper's
 large benchmark tables, SPEC/real-application evaluation, or hardware
