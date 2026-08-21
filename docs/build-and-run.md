@@ -39,6 +39,13 @@ export STICKYTAGS_CASE_TIMEOUT=120
 ./Experiment/configure-llvm.sh
 ./Experiment/build-llvm.sh
 ./Experiment/configure-compiler-rt-aarch64.sh
+ninja -C "$STICKYTAGS_LAB_ROOT/build/compiler-rt-aarch64" \
+    clang_rt.safestack-aarch64
+resource_dir=$("$STICKYTAGS_LAB_ROOT/build/llvm-rel-gcc13/bin/clang" \
+    --print-resource-dir)
+install -Dm644 \
+    "$STICKYTAGS_LAB_ROOT/build/compiler-rt-aarch64/lib/linux/libclang_rt.safestack-aarch64.a" \
+    "$resource_dir/lib/linux/libclang_rt.safestack-aarch64.a"
 ```
 
 ## 3. 构建修改版 TCMalloc
@@ -65,7 +72,7 @@ export STICKYTAGS_CASE_TIMEOUT=120
 
 该步骤包含三个合成用例和一个上游布局探针：正常访问、堆越界、栈越界以及 `test/test.c` 地址/tag 输出。布局探针按上游源码约定返回 1，不执行越界，也不作为防护效果证据。运行器会检查每个用例的退出状态和 MTE 专用故障类型，出现不符合预期的结果时返回失败。
 
-结果文件：
+本次运行结果写入 `$STICKYTAGS_LAB_ROOT/logs/`。仓库中经过检查的归档副本为：
 
 - `Experiment/logs/stage6-functional-test-results.txt`
 
@@ -78,7 +85,7 @@ export STICKYTAGS_CASE_TIMEOUT=120
 
 该脚本逐行断言：正常访问和未保护越界用例不产生 MTE fault，保护版本的堆、栈越界用例必须产生 MTE fault；普通 `SIGSEGV` 不能计作 MTE 检测成功。
 
-结果文件：
+本次运行结果写入 `$STICKYTAGS_LAB_ROOT/logs/`。仓库中经过检查的归档副本为：
 
 - `Experiment/logs/stage7-comparison-results.csv`
 - `Experiment/logs/stage7-comparison-summary.txt`
@@ -91,7 +98,7 @@ export STICKYTAGS_CASE_TIMEOUT=120
 ./Experiment/run-mechanism-tests-in-vm.sh 5 20 1000
 ```
 
-结果文件：
+本次运行结果写入 `$STICKYTAGS_LAB_ROOT/logs/`。仓库中经过检查的归档副本为：
 
 - `Experiment/logs/mechanism-test-results.txt`
 - `Experiment/logs/mechanism-test-summary.txt`
@@ -102,7 +109,7 @@ export STICKYTAGS_CASE_TIMEOUT=120
 ./Experiment/run-protected-baseline-in-vm.sh 5 20 1000
 ```
 
-结果文件：
+本次运行结果写入 `$STICKYTAGS_LAB_ROOT/logs/`。仓库中经过检查的归档副本为：
 
 - `Experiment/logs/protected-baseline-results.txt`
 - `Experiment/logs/protected-baseline-summary.txt`

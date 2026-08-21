@@ -126,6 +126,8 @@ StickyTags 按 size class 组织内存区域，将标签和对象槽位置稳定
 - [完整设计思路](docs/design.md)
 - [实验环境](docs/environment.md)
 - [构建和运行流程](docs/build-and-run.md)
+- [GitHub版操作手册](docs/GitHub%E7%89%88%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8C.md)
+- [本地版操作手册](docs/%E6%9C%AC%E5%9C%B0%E7%89%88%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8C.md)
 - [虚拟机资产要求](docs/vm-assets.md)
 - [测试设计与结果](docs/experiment-design.md)
 - [当前复现范围与限制](docs/limitations.md)
